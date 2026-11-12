@@ -19,6 +19,13 @@ sección para cada una de las tres partes.
 
 ## Flujo de trabajo por requerimiento
 
+### Estado actual del bloque R3 (2026-11-12)
+
+QuickHull propio, pruebas, exportación para R5, cuatro conjuntos verificados/medidos
+contra SciPy, figura y documento disponibles. Python 166/166; suite Java completa
+86/93 aprobadas, con 7 fallos por R4 pendiente. R1–R3 y arquitectura pasan. Las líneas
+base de R2 y del entorno que siguen son históricas, no el estado actual.
+
 ### Estado actual del bloque R2 (2026-11-12)
 
 Implementación Java, pruebas, 30 consultas medidas, matriz 40×40, verificación NetworkX

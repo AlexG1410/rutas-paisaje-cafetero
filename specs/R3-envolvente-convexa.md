@@ -1,6 +1,14 @@
 # R3 — Envolvente convexa de la red vial
 
-Estado: borrador · Responsable: _(asignar)_ · Peso: 20 % · Paquetes reorganizados: 2026-11-10 (sin cambio funcional)
+Estado: implementado, verificado y experimentado; documento y figura disponibles (2026-11-12).
+Responsable: _(asignar)_ · Peso: 20 %.
+
+Evidencia: cuatro conjuntos coinciden con SciPy antes y después de medir; cinco
+repeticiones por método sin timeout. Red: 8791 puntos y 14 vértices. Tabla final,
+conjuntos, vértices, datos de máquina y figura generados por comandos en results/r3/
+y results/figuras/r3_tiempos.png. Python 166/166; Java completo 86/93 aprobadas,
+con 7 fallos de TspTest por R4 pendiente; R1–R3 y arquitectura pasan. No se declara
+el proyecto completo ni se deshabilitan pruebas pendientes.
 
 ## Objetivo
 
@@ -44,6 +52,57 @@ Archivos: `results/r3/puntos_<conjunto>.csv`, `vertices_<conjunto>.csv`,
 
 ## Restricciones
 
+### Precisiones aprobadas para el bloque completo
+
+- QuickHull 2D propio, sin ordenamiento: extremos lexicográficos; pivote más alejado
+  por producto cruz, empate por menor (x,y); particiones estrictamente a la derecha
+  de cada segmento. Recorrer la cadena inferior y luego superior produce CCW.
+  Trabajar en rangos disjuntos de una copia de referencias a puntos, sin modificar la
+  entrada ni mantener listas de candidatos nuevas en cada nivel. Esto permite O(n)
+  de arreglo auxiliar más O(h) de salida y profundidad O(n) en el peor caso.
+- Lista/puntos null: IllegalArgumentException. Se toleran duplicados en calcular;
+  no se cuentan como vértices extra. orientacion usa operaciones long exactas con
+  Math.*Exact; si una resta/producto/cruz desborda, IllegalArgumentException, nunca
+  un giro silenciosamente incorrecto. No se promete resolver todos los long posibles.
+- redondearYDeduplicar rechaza arreglos null/de distinto tamaño, NaN/infinito y valores
+  redondeados fuera de long. El experimento exige rango por eje <= 1_000_000_000 m,
+  suficiente para que diferencias y cruces de estos conjuntos quepan en long.
+- Preparar cuatro conjuntos: red; cuadrado_1000, cuadrado_10000, cuadrado_50000. Cada
+  cuadrado genera exactamente el número nominal de muestras, con una instancia nueva
+  Random(SEMILLA) por conjunto y nextLong(LADO_CUADRADO) por coordenada. Eliminar
+  repetidos conservando orden; n registra el tamaño resultante, no se repone una muestra.
+- Antes de medir todos los conjuntos, validar salida: vértices únicos pertenecientes
+  a la entrada, mínimo primero, giros estrictos CCW y todos los puntos en el lado
+  interior de cada arista. Degenerados se validan aparte. Verificación geométrica
+  fuera del reloj; después de cada serie completada exigir la misma lista de vértices.
+- Medir con Medidor.medirConLimite y TareaEnvolvente, pasando ArrayList<Punto> ya
+  preparada; Punto implementa Serializable para transporte local. QuickHull devuelve
+  una ArrayList serializable (firma pública List), sin copiar resultado en el adaptador.
+  Solo se mide calcular, incluida su copia auxiliar, no lectura/preparación/validación.
+- COLUMNAS_PUNTOS_R3 = x,y (tanto puntos como vértices en orden canónico).
+  COLUMNAS_ENVOLVENTE_PROPIO_R3 = conjunto,n,vertices,tiempo_propio_ms,repeticiones,
+  semilla,estado. Timeout deja tiempo vacío; vértices exportados son la salida verificada
+  previa (no una falsa salida de la medición). No sobrescribir salidas por error previo
+  o resultado medido incorrecto. ResultadosRepository fija estas cabeceras.
+- envolvente_red.csv: orden,x,y,idx_nodo,lat,lon. Para cada vértice UTM redondeado se
+  conserva el primer nodo original que lo produjo y sus lat/lon, sin reproyectar el
+  punto entero. El polígono de mapa difiere como máximo por el redondeo de cada nodo.
+- Python solo verifica y mide SciPy: cargar todos los puntos como ndarray float64
+  fuera del reloj, contrastar los cuatro conjuntos ANTES de medir cualquiera, comparar
+  conjuntos de vértices y orden CCW canónico de Java. Sin QJ (no perturbar puntos).
+  Error de Qhull o discrepancia aborta sin modificar envolvente.csv. Los cuatro
+  conjuntos del experimento deben tener >=3 puntos no colineales. Degenerados del
+  algoritmo propio se comprueban con JUnit, no se fuerzan opciones de Qhull.
+- Medir ConvexHull directamente con medir_con_limite, ndarray preparado, un proceso
+  spawn por conjunto. Validar de nuevo sus vértices tras cada serie completada.
+  Guardar máquina Python en results/r3/maquina_python.csv sin pisar evidencia R1.
+- Tabla final mantiene columnas base del anexo y amplía: conjunto,n,vertices,
+  tiempo_propio_ms,tiempo_scipy_ms,cociente,coinciden,repeticiones,semilla,
+  repeticiones_scipy,estado_propio,estado_scipy. repeticiones corresponde a Java;
+  cociente solo con ambas completadas y tiempo SciPy >0. Timeout no inventa tiempo.
+- Figura opcional aprobada results/figuras/r3_tiempos.png: barras por conjunto y método,
+  eje y ms; no se unen tamaños de distribuciones distintas. Timeouts sin barras de cero.
+
 - Implementación propia, divide y vencerás, solo `java.lang`/`java.util`. Se permite
   `List.sort`/`Collections.sort` (TimSort según su Javadoc; citar su costo).
 - SciPy solo en `python/` para verificar y para la comparación de tiempos.
@@ -60,13 +119,25 @@ Archivos: `results/r3/puntos_<conjunto>.csv`, `vertices_<conjunto>.csv`,
 | T3-f | 2 000 puntos al azar en un cuadrado (semilla) | mismos vértices que la cadena monótona de Andrew (oráculo de la prueba), como conjunto; antihorario | verificación |
 | T3-g | ~500 puntos enteros cerca de una circunferencia | mismos vértices que el oráculo | muchos vértices |
 | T3-h | `redondearYDeduplicar({0.5, 1.49, 1.5}, {2.5, 0, 0})` | `[(1, 3), (1, 0), (2, 0)]` | redondeo .5 hacia arriba |
+| T3-i | duplicados, empates máximos, segmentos verticales y orden inverso | lista canónica sin colineales, entrada intacta | manual/oráculo |
+| T3-j | coordenadas UTM grandes y operaciones que desbordan | giro exacto o error explícito | borde numérico |
+| T3-k | null, coordenadas no finitas o tamaños distintos | IllegalArgumentException | validación |
+| T3.I-a | red sintética y medidor sustituido | cuatro conjuntos reproducibles, CSV y mapa correctos | integración |
+| T3.I-b | resultado medido incorrecto, timeout, red inválida | error sin sobrescritura; timeout explícito | integración |
+| T3.V-a | cuatro conjuntos sintéticos Java | SciPy verifica antes de medir; tabla/cociente/máquina | SciPy real |
+| T3.V-b | vértices/puntos/conteos/estados incorrectos o medidor incorrecto | error sin publicar tabla | verificación |
+| T3.F-a | tabla final y timeout | figura de ambos métodos sin cifras ficticias | Matplotlib |
 
 ## Criterios de aceptación
 
-- [ ] T3-* en verde (`EnvolventeConvexaTest`, `CatalogoServiceTest.t3h_...`).
-- [ ] Verificación contra SciPy en **todas** las pruebas del experimento (columna
+- [x] T3-* en verde (`EnvolventeConvexaTest`, `CatalogoServiceTest.t3h_...`).
+- [x] Verificación contra SciPy en **todas** las pruebas del experimento (columna
       `coinciden` = True en `envolvente.csv`).
-- [ ] Tabla con los 4 conjuntos: nodos de la red; cuadrado con 1 000, 10 000 y 50 000 puntos.
+- [x] Tabla con los 4 conjuntos: nodos de la red; cuadrado con 1 000, 10 000 y 50 000 puntos.
+- [x] Recurrencia, cotas mejor/equilibrada/general, promedio O(n·E[h]), pila y memoria derivadas; no se
+      confunde la cota equilibrada con una esperanza probada para toda distribución.
+- [x] Fuente de SciPy/Qhull verificada, comparación de trabajo y límites de causalidad.
+- [x] Figura, salida geográfica para R5 y guía personal de sustentación actualizadas.
 
 ## Análisis teórico (va al documento técnico)
 
@@ -90,13 +161,13 @@ repetidos. Puntos al azar: `new Random(Constantes.SEMILLA)` en Java, coordenadas
 `numpy.ndarray` ya construido (la conversión queda fuera de la medición), con la misma
 política de calentamiento y repeticiones que Java. `cociente = tiempo_propio_ms / tiempo_scipy_ms`.
 
-## Decisiones abiertas
+## Decisiones resueltas y política de discrepancias
 
-1. **Algoritmo**: recomendación inicial **QuickHull** (divide y vencerás; descarta pronto
+1. **Algoritmo**: **QuickHull**, aprobado al continuar el bloque (2026-11-12; divide y vencerás; descarta pronto
    los puntos interiores, que en la red son la gran mayoría; es la misma idea que usa Qhull,
    lo que hace interesante la comparación). Alternativa con peor caso garantizado
    O(n log n): envolvente por mezcla (Preparata y Hong, 1977), T(n) = 2T(n/2) + O(n).
-   Si se elige QuickHull, cuidar la profundidad de recursión en el peor caso (`bootRun` usa
+    Se documenta la profundidad de recursión en el peor caso (`bootRun` usa
    `-Xss16m`).
 2. Si SciPy y el algoritmo propio difieren en puntos colineales, investigar las opciones de
    Qhull y documentarlo (no "arreglar" el resultado propio para que coincida).

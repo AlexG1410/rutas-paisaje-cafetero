@@ -163,3 +163,38 @@ def test_t2fb_solo_timeout_sin_tiempos_logaritmicos_ficticios(entorno):
     assert tabla.loc[0, ["nodos_explorados", "tiempo_ms", "ns_por_posicion"]].isna().all()
     assert (graficas.FIGURAS / "r2_tiempo_vs_explorados.png").exists()
     assert not plt.get_fignums()
+
+
+def test_t3fa_figura_por_conjunto_y_timeout(entorno, monkeypatch):
+    origen_r1, _ = entorno
+    carpeta = origen_r1.parent.parent / "r3"
+    carpeta.mkdir()
+    pd.DataFrame({"conjunto": ["red", "cuadrado_1000"], "tiempo_propio_ms": [2, 3],
+                  "tiempo_scipy_ms": [1, None], "estado_propio": ["completada"] * 2,
+                  "estado_scipy": ["completada", "no completada"]}).to_csv(
+        carpeta / "envolvente.csv", index=False)
+    from matplotlib.figure import Figure
+    guardar = Figure.savefig
+
+    def comprobar(self, *args, **kwargs):
+        eje = self.axes[0]
+        assert sorted(barra.get_height() for barra in eje.patches) == [1, 2, 3]
+        assert any("no completada" in texto.get_text() for texto in eje.texts)
+        return guardar(self, *args, **kwargs)
+
+    monkeypatch.setattr(Figure, "savefig", comprobar)
+    graficas.ejecutar()
+    assert (graficas.FIGURAS / "r3_tiempos.png").exists()
+    assert not plt.get_fignums()
+
+
+def test_t3fa_figura_rechaza_timeout_con_tiempo(entorno):
+    origen_r1, _ = entorno
+    carpeta = origen_r1.parent.parent / "r3"
+    carpeta.mkdir()
+    pd.DataFrame({"conjunto": ["red"], "tiempo_propio_ms": [2], "tiempo_scipy_ms": [1],
+                  "estado_propio": ["completada"], "estado_scipy": ["no completada"]}).to_csv(
+        carpeta / "envolvente.csv", index=False)
+    with pytest.raises(ValueError):
+        graficas.ejecutar()
+    assert not (graficas.FIGURAS / "r3_tiempos.png").exists()

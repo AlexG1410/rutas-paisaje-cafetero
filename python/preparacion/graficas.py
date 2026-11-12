@@ -27,15 +27,16 @@ from preparacion.config import FIGURAS, RESULTS
 
 
 def ejecutar() -> None:
-    """Genera figuras de R1/R2 disponibles; no exige resultados de bloques futuros."""
+    """Genera figuras de R1/R2/R3 disponibles; no exige resultados de bloques futuros."""
     disponibles = False
     for archivo, generar in (("r1/tiempo_componente.csv", graficar_componente),
-                             ("r2/mediciones_dijkstra.csv", graficar_dijkstra)):
+                             ("r2/mediciones_dijkstra.csv", graficar_dijkstra),
+                             ("r3/envolvente.csv", graficar_envolvente)):
         if (RESULTS / archivo).exists():
             generar()
             disponibles = True
     if not disponibles:
-        raise FileNotFoundError("No hay CSV experimentales de R1/R2 para graficar")
+        raise FileNotFoundError("No hay CSV experimentales de R1/R2/R3 para graficar")
 
 
 def graficar_componente() -> None:
@@ -168,3 +169,42 @@ def _tamano_grafo_java() -> int:
     if valores.nunique() != 1:
         raise ValueError(f"V de grafo_java inconsistente en {archivo}")
     return int(valores.iloc[0])
+
+
+def graficar_envolvente() -> None:
+    """Barras por distribución, sin unir tamaños ni inventar tiempo cero en timeout."""
+    tabla = pd.read_csv(RESULTS / "r3/envolvente.csv")
+    requeridas = {"conjunto", "tiempo_propio_ms", "tiempo_scipy_ms", "estado_propio", "estado_scipy"}
+    if tabla.empty or not requeridas.issubset(tabla.columns) or tabla.conjunto.duplicated().any():
+        raise ValueError("Tabla R3 vacía, duplicada o con columnas faltantes")
+    for metodo in ("propio", "scipy"):
+        for fila in tabla.to_dict("records"):
+            estado, tiempo = fila[f"estado_{metodo}"], fila[f"tiempo_{metodo}_ms"]
+            if estado == "completada":
+                if not math.isfinite(float(tiempo)) or tiempo < 0:
+                    raise ValueError("Tiempo R3 inválido")
+            elif estado != "no completada" or not pd.isna(tiempo):
+                raise ValueError("Estado R3 desconocido o timeout con tiempo ficticio")
+    FIGURAS.mkdir(parents=True, exist_ok=True)
+    figura, eje = plt.subplots(figsize=(9, 5))
+    try:
+        for metodo, etiqueta, desplazamiento in (("propio", "QuickHull Java", -0.2),
+                                                 ("scipy", "SciPy / Qhull", 0.2)):
+            posiciones, tiempos = [], []
+            for i, fila in enumerate(tabla.to_dict("records")):
+                if fila[f"estado_{metodo}"] == "completada":
+                    posiciones.append(i + desplazamiento)
+                    tiempos.append(fila[f"tiempo_{metodo}_ms"])
+                else:
+                    eje.text(i + desplazamiento, 0.05, f"{etiqueta}: no completada",
+                             transform=eje.get_xaxis_transform(), rotation=90, va="bottom", color="red")
+            eje.bar(posiciones, tiempos, width=0.38, label=etiqueta)
+        eje.set_xticks(range(len(tabla)), tabla.conjunto)
+        eje.set_ylabel("Tiempo (ms)")
+        eje.set_title("Envolvente convexa: tiempos por conjunto")
+        eje.grid(True, axis="y", alpha=0.3)
+        eje.legend()
+        figura.tight_layout()
+        figura.savefig(FIGURAS / "r3_tiempos.png", dpi=150)
+    finally:
+        plt.close(figura)

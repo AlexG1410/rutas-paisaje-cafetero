@@ -47,9 +47,17 @@ también la tabla de la sección 10 de `AGENTS.md`.
    el JIT por una optimización de arranque. El hijo avisa INICIO después de preparar/GC;
    límite por ejecución y espera de infraestructura separada, no por serie completa.
 
-## D6. Envolvente: QuickHull — propuesta
+## D6. Envolvente: QuickHull — tomada (bloque R3 aprobado, 2026-11-12)
 - Puntos de la red mayoritariamente interiores (cascos urbanos y vías). Alternativa: por
   mezcla (Preparata-Hong), O(n log n) en el peor caso.
+- Variante 2D propia sin ordenamiento: extremos lexicográficos, pivote por máximo
+  alejamiento (cruz exacto) y dos subproblemas exteriores; colineales no se conservan.
+  Copia de referencias y particiones por rangos para no acumular listas por nivel.
+  Tiempo mejor Θ(n), cota equilibrada O(n log n), peor O(n²); no vender la cota
+  equilibrada como una garantía promedio para toda distribución. Memoria O(n), pila incluida.
+- SciPy usa los mismos puntos exportados; Qhull con opciones predeterminadas, sin
+  perturbar coordenadas para hacer coincidir resultados. El mapa conserva lat/lon
+  del primer nodo original asociado a cada punto redondeado.
 
 ## D7. Heurística: vecino más cercano — propuesta
 - Voraz clásica, Θ(k²), fácil de justificar con los elementos voraces de la guía 08.

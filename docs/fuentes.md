@@ -16,8 +16,13 @@ sección). Al verificarla, marcar `[x]` y anotar exactamente qué se usó.
       (variante que cita NetworkX; confirmar en su documentación).
 - [ ] Held, M. y Karp, R. M. (1962). A dynamic programming approach to sequencing problems.
       *Journal of the SIAM, 10*(1), 196–210. — R4.1.
-- [ ] Barber, C. B., Dobkin, D. P. y Huhdanpaa, H. (1996). The Quickhull algorithm for convex
-      hulls. *ACM Transactions on Mathematical Software, 22*(4), 469–483. — R3 (Qhull/SciPy).
+- [x] Barber, C. B., Dobkin, D. P. y Huhdanpaa, H. (1996). The Quickhull algorithm for convex
+       hulls. *ACM Transactions on Mathematical Software, 22*(4), 469–483. — R3 (Qhull/SciPy).
+      Referencia bibliográfica contrastada el 2026-11-12 con README oficial de Qhull:
+      https://raw.githubusercontent.com/qhull/qhull/master/README.txt.
+      Se consultó el manual oficial para la idea QuickHull y su combinación con
+      beneath-beyond en Qhull, no se afirma haber leído el PDF completo del artículo.
+      Las recurrencias y la memoria de nuestra variante se derivan del código.
 - [ ] Preparata, F. P. y Hong, S. J. (1977). Convex hulls of finite sets of points in two and
       three dimensions. *Communications of the ACM, 20*(2), 87–93. — R3 (alternativa por mezcla).
 - [ ] Boeing, G. (2017). OSMnx: New methods for acquiring, constructing, analyzing, and
@@ -26,6 +31,25 @@ sección). Al verificarla, marcar `[x]` y anotar exactamente qué se usó.
 - [ ] Guías del curso 02–09 (docente de Análisis de Algoritmos, U. del Quindío, 2026-2).
 
 ## Documentación técnica (citar con enlace y versión)
+- [x] SciPy, documentación ConvexHull (página 1.18.0, instalación local 1.18.1):
+      https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.ConvexHull.html.
+      Consultada el 2026-11-12: Qhull como motor, vertices CCW en 2D, opciones por defecto
+      y Qt habilitado; QhullError ante degeneración. Fuente Cython 1.18.0 consultada:
+      https://raw.githubusercontent.com/scipy/scipy/v1.18.0/scipy/spatial/_qhull.pyx,
+      declaraciones de libqhull_r y llamada nativa qh_new_qhull_scipy sobre points.data.
+      No se atribuye el costo medido a bucles Python ni a una compilación C++ no comprobada.
+- [x] Qhull, manual oficial, distribución 2020.2, consultado el 2026-11-12 en el repositorio
+      oficial porque el dominio qhull.org no respondió:
+      https://raw.githubusercontent.com/qhull/qhull/master/html/index.htm (QuickHull 2D +
+      beneath-beyond general, aritmética flotante y facetas gruesas),
+      https://raw.githubusercontent.com/qhull/qhull/master/html/qh-code.htm (biblioteca
+      reentrante C y rendimiento sujeto a hipótesis, no garantía universal O(n log h)),
+      https://raw.githubusercontent.com/qhull/qhull/master/html/qh-quick.htm (opciones).
+      No se traslada la complejidad interna de Qhull a nuestra implementación 2D.
+- [x] CPython 3.14.3, fuente local `Lib/multiprocessing/popen_spawn_win32.py`, líneas
+      73–99, inspeccionada el 2026-11-12: CreateProcess ocurre antes de reduction.dump
+      del Process. Se usa para justificar serializar tarea/datos antes de crear el hijo;
+      no es una afirmación de un fallo de CPython oficialmente reportado o diagnosticado.
 - [x] Oracle. *Java SE 21 API*, `java.util.ArrayList`.
       https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ArrayList.html
       Consultada el 2026-11-12: get/size O(1), add al final O(1) amortizado. Usada para

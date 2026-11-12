@@ -1,0 +1,5 @@
+conjunto,n,vertices,tiempo_propio_ms,repeticiones,semilla,estado
+red,8791,14,1.3266,5,2026,completada
+cuadrado_1000,1000,17,0.3856,5,2026,completada
+cuadrado_10000,10000,22,1.609,5,2026,completada
+cuadrado_50000,50000,33,4.0947,5,2026,completada

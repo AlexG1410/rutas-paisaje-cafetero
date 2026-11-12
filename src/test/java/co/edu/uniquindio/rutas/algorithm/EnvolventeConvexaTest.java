@@ -2,6 +2,7 @@ package co.edu.uniquindio.rutas.algorithm;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import co.edu.uniquindio.rutas.model.Punto;
 import java.util.ArrayList;
@@ -19,6 +20,48 @@ import org.junit.jupiter.api.Test;
  * los casos al azar es la cadena monótona de Andrew, un algoritmo distinto e independiente.
  */
 class EnvolventeConvexaTest {
+
+    @Test void t3i_duplicadosEmpatesYEntradaIntacta() {
+        var entrada = new ArrayList<>(List.of(p(0, 0), p(4, 0), p(4, 4), p(0, 4),
+                p(2, 0), p(2, 4), p(0, 4), p(0, 0)));
+        var copia = List.copyOf(entrada);
+        var esperado = List.of(p(0, 0), p(4, 0), p(4, 4), p(0, 4));
+        assertEquals(esperado, EnvolventeConvexa.calcular(entrada));
+        assertEquals(copia, entrada);
+        Collections.reverse(entrada);
+        assertEquals(esperado, EnvolventeConvexa.calcular(entrada));
+        assertEquals(List.of(p(1, -2), p(1, 8)),
+                EnvolventeConvexa.calcular(List.of(p(1, 3), p(1, 8), p(1, -2))));
+        assertEquals(List.of(p(3, 4)), EnvolventeConvexa.calcular(List.of(p(3, 4), p(3, 4))));
+    }
+
+    @Test void t3j_exactitudYDesbordamiento() {
+        assertEquals(1_000_000_000_000L, EnvolventeConvexa.orientacion(
+                p(400_000, 400_000), p(1_400_000, 400_000), p(400_000, 1_400_000)));
+        assertThrows(IllegalArgumentException.class, () -> EnvolventeConvexa.orientacion(
+                p(Long.MIN_VALUE, 0), p(Long.MAX_VALUE, 0), p(0, 1)));
+        assertThrows(IllegalArgumentException.class, () -> EnvolventeConvexa.orientacion(
+                p(0, 0), p(4_000_000_000L, 0), p(0, 4_000_000_000L)));
+    }
+
+    @Test void t3k_rechazaNull() {
+        assertThrows(IllegalArgumentException.class, () -> EnvolventeConvexa.calcular(null));
+        assertThrows(IllegalArgumentException.class, () -> EnvolventeConvexa.calcular(
+                java.util.Arrays.asList(p(0, 0), null)));
+        assertThrows(IllegalArgumentException.class,
+                () -> EnvolventeConvexa.orientacion(null, p(0, 0), p(1, 1)));
+    }
+
+    @Test void t3i_multiplesNubesConRepetidosContraOraculo() {
+        Random azar = new Random(2026);
+        for (int caso = 0; caso < 40; caso++) {
+            List<Punto> puntos = new ArrayList<>();
+            for (int i = 0; i < 150; i++) {
+                puntos.add(p(azar.nextInt(21) - 10, azar.nextInt(21) - 10));
+            }
+            verificarContraOraculo(puntos);
+        }
+    }
 
     private static Punto p(long x, long y) {
         return new Punto(x, y);
@@ -53,7 +96,7 @@ class EnvolventeConvexaTest {
 
     @Test
     void t3e_trianguloConInteriores() {
-        Random azar = new Random(1);
+        Random azar = new Random(2026);
         Set<Punto> interiores = new LinkedHashSet<>();
         while (interiores.size() < 20) {
             Punto q = p(1 + azar.nextInt(9), 1 + azar.nextInt(7));
@@ -80,7 +123,7 @@ class EnvolventeConvexaTest {
 
     @Test
     void t3g_cercaDeUnaCircunferenciaContraOraculo() {
-        Random azar = new Random(3);
+        Random azar = new Random(2026);
         Set<Punto> unicos = new LinkedHashSet<>();
         for (int i = 0; i < 500; i++) {
             double t = azar.nextDouble() * 2 * Math.PI;

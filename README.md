@@ -63,6 +63,27 @@ La instalación de dependencias también requiere internet.
 
 ### Pruebas de infraestructura y pruebas de algoritmos
 
+**Actualización 2026-11-12 (bloque R3):** QuickHull Java propio, verificación y medición
+SciPy completadas. Python 166/166; Java completo 86/93 aprobadas, con 7 fallos de TSP
+por R4 pendiente. Arquitectura y R1–R3 pasan. Las actualizaciones siguientes son históricas.
+
+Reproducir R3 desde la raíz (datos procesados de R1 disponibles):
+
+```powershell
+.\gradlew.bat bootRun --args=maquina --console=plain
+.\gradlew.bat bootRun --args=r3 --console=plain
+cd python
+.\.venv\Scripts\python.exe -m preparacion envolvente-scipy
+.\.venv\Scripts\python.exe -m preparacion graficas
+cd ..
+```
+
+Los cuatro conjuntos/vértices y la tabla final están en `results/r3/`; la figura en
+`results/figuras/r3_tiempos.png` y el análisis en `docs/documento-tecnico/04-r3-envolvente.md`.
+SciPy recibe exactamente los puntos exportados por Java y verifica antes de medir.
+Su entorno se conserva en `results/r3/maquina_python.csv`, sin reemplazar el de R1.
+No ejecutar pruebas o tareas pesadas simultáneamente con las mediciones.
+
 **Actualización 2026-11-12 (bloque R2):** ambos Dijkstra, reconstrucción, experimento y
 matriz implementados. Suite Python: 142/142. Suite Java completa: 84 pruebas, 70
 aprobadas y 14 fallos por R3/R4 aún pendientes; ArchUnit y R1/R2 pasan. Las cifras

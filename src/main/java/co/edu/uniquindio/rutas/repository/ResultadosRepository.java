@@ -30,6 +30,11 @@ public class ResultadosRepository {
     public static final List<String> COLUMNAS_MEDICIONES_R2 = List.of("origen", "destino", "version",
             "tiempo_viaje_s", "nodos_explorados", "tiempo_ms", "repeticiones", "estado", "ruta_nodos");
     public static final List<String> COLUMNAS_COCIENTE_R2 = List.of("origen", "destino", "cociente", "estado");
+    public static final List<String> COLUMNAS_PUNTOS_R3 = List.of("x", "y");
+    public static final List<String> COLUMNAS_ENVOLVENTE_PROPIO_R3 = List.of("conjunto", "n", "vertices",
+            "tiempo_propio_ms", "repeticiones", "semilla", "estado");
+    public static final List<String> COLUMNAS_ENVOLVENTE_RED_R3 =
+            List.of("orden", "x", "y", "idx_nodo", "lat", "lon");
 
     /** R1.4: admite cero lejanos y conserva la cabecera. */
     public Path guardarLugaresLejanos(List<FilaLugarNodo> filas) {

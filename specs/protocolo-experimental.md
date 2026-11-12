@@ -148,3 +148,12 @@ el canal después de un corte: se desecha junto al hijo en cada llamada.
 - [ ] Indica la unidad de tiempo.
 - [ ] Indica máquina (referencia a `maquina_java.csv` / `maquina_python.csv`) y semilla.
 - [ ] Tiene un párrafo: lo esperado según la complejidad, lo medido y la explicación.
+### Preparación serializada Python antes de spawn (R3, 2026-11-12)
+
+Serializar tarea/args/kwargs a bytes con ForkingPickler ANTES de crear el hijo. Si falla,
+RuntimeError de inicio sin crear proceso. El hijo deserializa antes de INICIO y del reloj.
+Motivo: en Windows CPython inicia el proceso antes de terminar de serializar Process;
+una lambda inválida puede dejar un arranque parcial y afectar la siguiente creación.
+Regresión P6.7-j: tarea no serializable seguida inmediatamente de tarea válida; la válida
+completa y se recogen hijos. Conservar pruebas de preparación lenta fuera del reloj,
+errores de tarea/resultado y timeout, sin debilitar sus comprobaciones.

@@ -17,6 +17,7 @@ from __future__ import annotations
 import gc
 import math
 import multiprocessing as mp
+import pickle
 import statistics
 import time
 from collections.abc import Callable
@@ -108,11 +109,12 @@ def _medir_serie(
 
 
 def _trabajo_aislado(
-    canal: Connection, fn: Callable[..., Any], args: tuple, kwargs: dict,
+    canal: Connection, entrada: bytes,
     repeticiones: int, calentamientos: int, umbral_una_s: float,
 ) -> None:
     """Punto de entrada importable por spawn; no se llama desde la CLI directamente."""
     try:
+        fn, args, kwargs = pickle.loads(entrada)  # Preparación antes de INICIO y del reloj.
         medicion = _medir_serie(fn, args, kwargs, repeticiones, calentamientos,
                                umbral_una_s, canal)
         canal.send(("RESULTADO", medicion))
@@ -158,10 +160,16 @@ def medir_con_limite(
     RuntimeError, no como resultados experimentales «no completada».
     """
     _validar_parametros(fn, repeticiones, calentamientos, umbral_una_s, limite_s)
+    try:
+        # Windows crea el hijo antes de terminar de serializar Process. No enviar una
+        # tarea inválida por ese canal: podría dejar un arranque parcial sin PID recogible.
+        entrada = bytes(mp.reduction.ForkingPickler.dumps((fn, args, kwargs)))
+    except Exception as error:
+        raise RuntimeError("No se pudo iniciar el proceso; use tarea y datos serializables") from error
     contexto = mp.get_context("spawn")
     receptor, emisor = contexto.Pipe(duplex=False)
     proceso = contexto.Process(target=_trabajo_aislado, args=(
-        emisor, fn, args, kwargs, repeticiones, calentamientos, umbral_una_s,
+        emisor, entrada, repeticiones, calentamientos, umbral_una_s,
     ), daemon=True)
     tiempos: list[float] = []
     ejecutando = False

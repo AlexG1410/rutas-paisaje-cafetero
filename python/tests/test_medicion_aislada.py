@@ -159,6 +159,25 @@ def test_p67f_lambda_no_serializable_limpia_recursos() -> None:
     assert _hijos() == antes
 
 
+def test_p67j_inicio_fallido_no_contamina_spawn_siguiente(monkeypatch: pytest.MonkeyPatch) -> None:
+    antes = _hijos()
+    original = mp.get_context
+    contextos = []
+
+    def registrar(metodo):
+        contextos.append(metodo)
+        return original(metodo)
+
+    monkeypatch.setattr(mp, "get_context", registrar)
+    for numero in range(2):
+        with pytest.raises(RuntimeError, match="iniciar"):
+            medicion.medir_con_limite(lambda: 1)
+        assert len(contextos) == numero  # Ni se prepara un proceso para la tarea inválida.
+        m = medicion.medir_con_limite(_identidad, 123, repeticiones=1, calentamientos=0)
+        assert m.completada and m.resultado == 123
+        assert _hijos() == antes
+
+
 @pytest.mark.parametrize("demoras", [[0.35], [0, 0.35], [0, 0, 0.35]])
 def test_p67g_una_muestra_larga_tras_calentamiento(demoras: list[float]) -> None:
     m = medicion.medir_con_limite(_SerieDemoras(demoras), umbral_una_s=0.2, limite_s=10)

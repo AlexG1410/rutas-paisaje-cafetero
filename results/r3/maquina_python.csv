@@ -1,0 +1,14 @@
+clave,valor
+fecha,2026-11-12T17:57:30
+procesador,"Intel64 Family 6 Model 186 Stepping 2, GenuineIntel"
+nucleos_logicos,12
+ram_gb,23.67
+sistema_operativo,Windows-11-10.0.26200-SP0
+python,3.14.3
+osmnx,2.1.1
+networkx,3.7
+scipy,1.18.1
+numpy,2.5.4
+pandas,3.1.1
+pyproj,3.8.0
+geopandas,1.2.0

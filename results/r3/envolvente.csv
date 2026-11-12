@@ -1,0 +1,5 @@
+conjunto,n,vertices,tiempo_propio_ms,tiempo_scipy_ms,cociente,coinciden,repeticiones,semilla,repeticiones_scipy,estado_propio,estado_scipy
+red,8791,14,1.3266,2.9798,0.44519766427276997,True,5,2026,5,completada,completada
+cuadrado_1000,1000,17,0.3856,1.2646,0.3049185513205757,True,5,2026,5,completada,completada
+cuadrado_10000,10000,22,1.609,5.4232,0.2966883021094557,True,5,2026,5,completada,completada
+cuadrado_50000,50000,33,4.0947,9.7305,0.4208108524741791,True,5,2026,5,completada,completada

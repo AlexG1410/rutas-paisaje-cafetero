@@ -64,3 +64,18 @@ No se ejecutaron experimentos ni se alteraron resultados.
 Resolver control de versión con el equipo y ajustar el protocolo antes de R1.3
 experimental; consolidar documentación y robustez de R1; continuar R2 → R3 → R4 → R5,
 verificando antes de medir y completando análisis y discusión en cada etapa.
+
+## Seguimiento posterior
+
+2026-11-11: corregida la regla de una sola muestra si una repetición posterior al
+calentamiento supera un minuto, en Python y Java (también JVM aislada). Pruebas de
+regresión añadidas antes de implementar; Python 77/77 y Java filtrado con arquitectura
+satisfactorio. El corte de 5 min en Python y los demás pendientes siguen abiertos.
+No se generaron resultados experimentales ni se modificaron los datos del proyecto.
+
+2026-11-11, siguiente etapa: añadido `medicion.medir_con_limite` para Python con proceso
+`spawn`, límite por ejecución, error distinto de timeout y recogida del hijo. Python
+105/105; Java filtrado de R1/medición/arquitectura satisfactorio (sin cambios de tareas).
+R1.3/SciPy aún pendientes de integrar con el arnés; no se ha ejecutado un experimento.
+La publicación inicial Git/GitHub ya se realizó en `main` (commit `d6430f3`); los cambios
+posteriores no se han confirmado ni subido sin una nueva solicitud del integrante.

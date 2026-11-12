@@ -65,6 +65,16 @@ Revisión superficial (2026-11-11): alineación con enunciado y guías registrad
 aplicar el límite experimental también en Python. Pendientes de robustez de entrada
 Java y consolidación de textos históricos señalados, sin cambios de implementación.
 
+Avance del protocolo (2026-11-11): corregida la política >1 min también para
+repeticiones posteriores al calentamiento, en Python y Java. Python 77/77 y Java
+filtrado de R1/medición/arquitectura satisfactorio. No se ejecutaron experimentos;
+el límite de 5 min en Python continúa pendiente antes de R1.3 experimental.
+
+Actualización posterior (2026-11-11): `medicion.medir_con_limite` ya implementado y
+verificado, con límite por ejecución en proceso `spawn`, sin incluir arranque ni
+transferencias en el cronómetro. Suite Python 105/105. R1.3 todavía no está integrado
+ni ejecutado: debe usar este arnés y completar verificación/redes por radio/resultados.
+
 ## Objetivo
 
 Descargar la red vial del Quindío (OSMnx, `network_type="drive"`), elegir su representación,
@@ -212,7 +222,7 @@ para cada par (u, v) la de menor `tiempoS`. Documentarlo en el R1.1.
     complejidad que no declara explícitamente.
 3. Medir el tiempo de la función en redes de tamaño creciente: `ox.graph_from_point` desde la
    plaza de Bolívar de Armenia con radios 2, 5, 10 y 20 km, y la red del departamento.
-   1 calentamiento + 5 repeticiones, mediana (`preparacion.medicion.medir`). Tabla: red, V,
+   1 calentamiento + 5 repeticiones, mediana (`preparacion.medicion.medir_con_limite`). Tabla: red, V,
    E, V+E, tiempo (ms). Se mide en Python porque la función es de OSMnx.
 4. Comprobar si el tiempo crece como lo predice la complejidad (gráfica V+E vs tiempo y
    cociente tiempo/(V+E) aproximadamente constante si es lineal).
@@ -236,7 +246,7 @@ para cada par (u, v) la de menor `tiempoS`. Documentarlo en el R1.1.
   si ninguna las tiene, genera solo la cabecera y la CLI avisa: la asociación de lugares
   sigue pendiente. Esto NO da por válido ni completo el catálogo.
 - La CLI informa la carpeta exportada y la limitación del catálogo. No mide tiempos:
-  los experimentos siguen en `preparacion.r1_componente`, con `medicion.medir`.
+  los experimentos siguen en `preparacion.r1_componente`, con `medicion.medir_con_limite`.
 
 **Cuidado (detectado en OSMnx 2.1.1):** `graph_from_place` y `graph_from_point` tienen
 `retain_all=False` por defecto, es decir, **ya devuelven la componente débilmente conexa más

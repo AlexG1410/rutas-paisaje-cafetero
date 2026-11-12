@@ -28,7 +28,8 @@ import java.util.function.Supplier;
  *   <li>Calentamiento (JVM): primero se hacen {@code calentamientos} ejecuciones que no se
  *       cuentan, para que el compilador JIT optimice el código antes de medir. Si una de ellas
  *       ya supera el umbral de 1 min, se toma como la única medición (6.3).</li>
- *   <li>6.3: luego {@code repeticiones} ejecuciones medidas; se reporta la mediana.</li>
+ *   <li>6.3: luego {@code repeticiones} ejecuciones medidas; se reporta la mediana. Si
+ *       cualquiera supera 1 min, se detiene y se conserva solo esa ejecución.</li>
  *   <li>6.4: milisegundos con {@link System#nanoTime()}.</li>
  *   <li>6.7: {@link #medirConLimite} corre en una JVM aparte y la termina si una ejecución
  *       pasa del límite: la medición queda "no completada".</li>
@@ -65,11 +66,11 @@ public final class Medidor {
         List<Double> tiempos = new ArrayList<>();
         for (int i = 0; i < repeticiones; i++) {
             Ejecucion<T> e = ejecutar(algoritmo);
+            if (e.ms() > umbralMs) {
+                return new Medicion(List.of(e.ms()), true, e.resultado());
+            }
             tiempos.add(e.ms());
             resultado = e.resultado();
-            if (i == 0 && calentamientos == 0 && e.ms() > umbralMs) {
-                break;
-            }
         }
         return new Medicion(tiempos, true, resultado);
     }
@@ -114,7 +115,13 @@ public final class Medidor {
                 Mensaje m = (Mensaje) recibido;
                 switch (m.tipo()) {
                     case CALENTAMIENTO -> { /* no se cuenta */ }
-                    case REPETICION -> tiempos.add(m.ms());
+                    case REPETICION -> {
+                        if (m.ms() > umbralUnaS * 1000.0) {
+                            // La hija se detiene tras esta ejecución; no mezclar muestras breves.
+                            tiempos.clear();
+                        }
+                        tiempos.add(m.ms());
+                    }
                     case FIN -> {
                         return new Medicion(tiempos, true, m.resultado());
                     }

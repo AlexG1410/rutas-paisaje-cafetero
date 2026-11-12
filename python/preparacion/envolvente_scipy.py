@@ -5,7 +5,7 @@ Para cada conjunto de results/r3/envolvente_propio.csv:
    medición).
 2. Verificar: vértices de ``scipy.spatial.ConvexHull`` == results/r3/vertices_<conjunto>.csv
    (como conjuntos).
-3. Medir ``ConvexHull(arreglo)`` con ``preparacion.medicion.medir``.
+3. Medir ``ConvexHull(arreglo)`` con ``preparacion.medicion.medir_con_limite``.
 4. Escribir results/r3/envolvente.csv: conjunto, n, vertices, tiempo_propio_ms,
    tiempo_scipy_ms, cociente, coinciden, repeticiones, semilla.
 """

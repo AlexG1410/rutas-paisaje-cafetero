@@ -6,10 +6,55 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.Test;
 
 /** Protocolo experimental (sección 6) aplicado por el arnés. */
 class MedidorTest {
+
+    /** Tarea de prueba con calentamiento breve y una repetición posterior lenta. */
+    public static final class DemoraPosterior implements Tarea<Integer, Integer> {
+        private int llamadas;
+
+        @Override
+        public Integer ejecutar(Integer llamadaLenta) {
+            llamadas++;
+            if (llamadas == llamadaLenta) {
+                new Dormir().ejecutar(350);
+            }
+            return llamadas;
+        }
+    }
+
+    @Test
+    void p63ab_repeticionLargaTrasCalentarConservaSoloEsaMuestra() {
+        for (int llamadaLenta : List.of(2, 3)) {
+            AtomicInteger llamadas = new AtomicInteger();
+            Medicion m = Medidor.medir(() -> {
+                int actual = llamadas.incrementAndGet();
+                if (actual == llamadaLenta) {
+                    new Dormir().ejecutar(350);
+                }
+                return actual;
+            }, 5, 1, 0.2);
+            assertEquals(llamadaLenta, llamadas.get());
+            assertEquals(llamadaLenta, m.resultado());
+            assertEquals(1, m.repeticiones());
+            assertTrue(m.medianaMs() >= 200);
+        }
+    }
+
+    @Test
+    void p63d_jvmAisladaDescartaMuestrasBrevesSiUnaPosteriorEsLarga() {
+        for (int llamadaLenta : List.of(2, 3)) {
+            Medicion m = Medidor.medirConLimite(DemoraPosterior.class, llamadaLenta,
+                    5, 1, 0.2, 30);
+            assertTrue(m.completada());
+            assertEquals(llamadaLenta, m.resultado());
+            assertEquals(1, m.repeticiones());
+            assertTrue(m.medianaMs() >= 200);
+        }
+    }
 
     /** Tarea de prueba: suma 0..n-1. */
     public static final class Sumar implements Tarea<Integer, Long> {

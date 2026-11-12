@@ -48,7 +48,7 @@ public final class ProcesoAislado {
                         Medidor.ejecutar(() -> tarea.ejecutar(entrada));
                 resultado = e.resultado();
                 enviar(out, new Mensaje(Mensaje.Tipo.REPETICION, e.ms(), null, null));
-                if (i == 0 && calentamientos == 0 && e.ms() > umbralMs) {
+                if (e.ms() > umbralMs) {
                     unaSola = true;
                 }
             }

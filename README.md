@@ -181,8 +181,23 @@ y grafo Java deduplicado. Cabecera: `red,representacion,supuesto_bytes,V,E,megab
 MB decimales, sin medir memoria real de objetos JVM. Los conteos de `metadatos.json`
 deben ser compatibles con los CSV procesados; no se escriben salidas ante errores
 de validación. No se descarga nada ni se modifican las coordenadas del catálogo.
-Las mediciones de R1.3 siguen pendientes. Validación actual: Python 74/74; Java completa
-45/68 aprobadas y 23 fallidas por algoritmos R2–R4 sin implementar; arquitectura aprobada.
+Las mediciones de R1.3 siguen pendientes. Suite Python actual: 105/105. La última suite
+Java completa ejecutada antes de los cambios del protocolo tuvo 45/68 aprobadas y 23
+fallidas por algoritmos R2–R4 pendientes; los tests filtrados de R1/medición/arquitectura
+son satisfactorios tras corregir el protocolo. No equivale a suite completa verde.
+
+### Medición Python con límite
+
+`preparacion.medicion.medir_con_limite` ya permite una serie en un proceso separado
+compatible con Windows (`spawn`). Supervisa cinco minutos por ejecución, incluido el
+calentamiento, y registra solo la llamada al algoritmo: arranque, preparación y envío
+de resultados quedan fuera del cronómetro. Si supera el límite, termina al hijo y
+devuelve `no completada`, sin mediana ni resultado parcial utilizable.
+
+Las tareas y datos deben ser serializables y las funciones importables (sin lambdas).
+Usar desde módulos/CLI con guardia `if __name__ == "__main__"`, no definir las tareas en
+un comando interactivo `python -c`. No añade dependencias. R1.3 y SciPy todavía deben
+integrarse: disponer del arnés no significa que existan mediciones experimentales.
 
 ## Aplicación (R5)
 

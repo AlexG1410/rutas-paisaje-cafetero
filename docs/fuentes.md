@@ -26,6 +26,15 @@ sección). Al verificarla, marcar `[x]` y anotar exactamente qué se usó.
 - [ ] Guías del curso 02–09 (docente de Análisis de Algoritmos, U. del Quindío, 2026-2).
 
 ## Documentación técnica (citar con enlace y versión)
+- [x] Python Software Foundation. *Python 3.14 Library Reference*, `multiprocessing`.
+      https://docs.python.org/3.14/library/multiprocessing.html
+      Consultada el 2026-11-11: secciones Contexts and start methods, Process and exceptions,
+      Pipes and Queues y Connection Objects. `spawn` abre un intérprete nuevo, requiere
+      funciones importables y datos serializables; `Pipe` transmite objetos con pickle;
+      `terminate`/`kill` detienen el hijo y `join` espera su cierre. La documentación
+      advierte que terminar un proceso puede corromper su canal: aquí el canal se desecha
+      después de cada serie. No se afirma que estas operaciones impongan un límite de
+      tiempo real exacto. Desarrollo y pruebas locales con Python 3.14.3; fuente de la serie 3.14.
 - [x] Oracle (2023). *The Java Language Specification, Java SE 21 Edition*, §4.2,
       §4.2.1 y §4.2.3. https://docs.oracle.com/javase/specs/jls/se21/html/jls-4.html
       Consultada el 2026-11-11: `int` de 32 bits y `double` de formato binary64 de 64 bits;

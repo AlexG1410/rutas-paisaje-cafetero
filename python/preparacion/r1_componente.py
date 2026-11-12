@@ -2,7 +2,8 @@
 
 Spec: specs/R1-modelo-red.md. Redes: ``ox.graph_from_point`` desde la plaza de Bolívar de
 Armenia (coordenadas de ``cab_armenia`` en el catálogo) con radios RADIOS_KM, más la red del
-departamento. Se mide con ``preparacion.medicion.medir`` (5 repeticiones, mediana).
+departamento. Se medirá con ``preparacion.medicion.medir_con_limite`` (5 repeticiones,
+mediana y corte por ejecución). Integración aún pendiente.
 
 Salidas:
 - results/r1/tamano_red.csv          red, nodos, aristas  (descargada y componente)

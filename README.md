@@ -83,6 +83,10 @@ Evidencia: `results/r2/`, `results/figuras/r2_tiempo_vs_explorados.png` y análi
 `docs/documento-tecnico/03-r2-caminos-minimos.md`. La matriz Java contiene 40×40 tiempos
 en segundos a tres decimales. NetworkX verifica, no genera esa matriz. No ejecutar
 pruebas ni tareas pesadas simultáneamente con las mediciones.
+El comando `graficas` usa eje vertical logarítmico en R2 y genera además
+`results/r2/normalizacion_lineal.csv` con T/(k·V) en ns por posición, leyendo V de
+`results/r1/memoria_representacion.csv` (filas `grafo_java`). Es análisis derivado,
+sin nuevas mediciones ni cambios en los tiempos originales.
 
 Los algoritmos pendientes lanzan `UnsupportedOperationException`: sus pruebas deben seguir
 visibles y fallarán hasta implementarlos. Eso no equivale a un fallo de instalación.

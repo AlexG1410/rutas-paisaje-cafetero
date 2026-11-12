@@ -130,7 +130,7 @@ ejecución; no hubo timeouts ni se activó la excepción de una sola ejecución 
 
 ### Comparación sobre los diez pares comunes
 
-| Origen → destino | Nodos fijados | Lineal (ms) | Cola (ms) |
+| Origen → destino | Nodos explorados | Lineal (ms) | Cola (ms) |
 |---|---:|---:|---:|
 | cab_pijao → ac_coocafeq_pijao | 3 | 0.548 | 0.267 |
 | fh_san_alberto → cab_buenavista | 14 | 0.784 | 0.164 |
@@ -161,12 +161,44 @@ Fuente: `results/r2/cociente.csv`. En esta serie la cola fue más rápida en los
 pares comunes. La variación del cociente muestra que no existe una aceleración fija
 para todas las consultas.
 
-![Nodos fijados frente a tiempo de Dijkstra](../../results/figuras/r2_tiempo_vs_explorados.png)
+![Nodos explorados frente a tiempo de Dijkstra, eje vertical logarítmico](../../results/figuras/r2_tiempo_vs_explorados.png)
 
 La figura se genera desde el CSV de mediciones con `python -m preparacion graficas`.
-La versión lineal crece claramente con el número de nodos fijados sobre esta red de
-tamaño fijo; la cola mantiene menores tiempos. No son curvas de T(V) variando el tamaño
+El eje vertical usa escala logarítmica para distinguir los tiempos de la cola sin
+perder la comparación con la versión lineal; distancias verticales iguales representan
+factores iguales, no incrementos iguales de ms. «Nodos explorados» corresponde a la
+columna `nodos_explorados`: nodos fijados por primera vez, incluido el destino; las
+extracciones obsoletas de la cola no cuentan. No son curvas de T(V) variando el tamaño
 del grafo: V permanece fijo y cambia cuánto se explora antes de alcanzar el destino.
+
+### Tiempo lineal normalizado por k·V
+
+Para consultas con destino alcanzable, cada uno de los k nodos explorados exige un
+barrido completo de V posiciones en la selección lineal. Se calcula
+`q = T_ms · 10⁶ / (k·V)`, expresado en ns por posición. El mismo comando `graficas`
+genera `results/r2/normalizacion_lineal.csv` desde las mediciones existentes y el
+V de `grafo_java` en `results/r1/memoria_representacion.csv`, sin volver a medir.
+En esta red V = 8791. Se conservan todas las consultas lineales:
+
+| Nodos explorados k | T/(k·V), ns por posición |
+|---:|---:|
+| 3 | 20.779 |
+| 14 | 6.370 |
+| 78 | 2.048 |
+| 94 | 1.607 |
+| 222 | 1.887 |
+| 906 | 1.211 |
+| 2136 | 1.642 |
+| 2904 | 1.338 |
+| 3417 | 1.328 |
+| 6433 | 1.419 |
+
+Fuente: `results/r2/normalizacion_lineal.csv`, valores redondeados a tres decimales.
+En las seis consultas con k ≥ 200, q queda entre 1.21 y 1.89 ns por posición. Su
+relativa estabilidad respalda el predominio del barrido lineal en esas consultas.
+El umbral 200 describe este conjunto de observaciones, no una frontera teórica ni
+un criterio para descartar las consultas pequeñas. El numerador incluye todo el
+algoritmo y la reconstrucción: q no mide aisladamente el costo de una posición.
 
 ## 3.6 Matriz de tiempos
 
@@ -190,6 +222,23 @@ versión lineal, aunque pare al fijar el destino, vuelve a recorrer las V posici
 en cada selección; la cola evita ese barrido a cambio de operaciones de montículo y
 entradas obsoletas. Los resultados son consistentes con ese mecanismo, no una prueba
 experimental de las cotas asintóticas.
+
+La normalización anterior refuerza la comparación con el modelo de operaciones. Para
+un destino alcanzable hay exactamente k barridos de V posiciones: Ω(k·V). A esto se
+añaden inicialización O(V), aristas examinadas O(Eᵣ) y reconstrucción O(r). Como k ≥ 1,
+r ≤ k y, al deduplicar aristas, Eᵣ ≤ k·V, resulta Θ(k·V) para esta implementación en
+el modelo de costo por operación. Es una derivación del código; la estabilidad
+empírica del cociente no demuestra por sí sola esa cota ni la generaliza a otras JVM.
+
+En las consultas pequeñas ambas versiones asignan tres arreglos de tamaño V
+(distancias, predecesores y fijados), con inicialización de costo Θ(V) independiente
+de k. Este costo común ayuda a explicar que la ventaja relativa de la cola sea menor
+en varios pares cortos y que T/(k·V) aumente al disminuir k: un término a·V aporta
+a/k al cociente. Para k=3 y k=14 se observan respectivamente 20.779 y 6.370 ns por
+posición. No se midió la inicialización por separado, por lo que no puede afirmarse
+que sea por sí sola el costo dominante; también intervienen asignaciones, JIT y ruido
+del sistema. El mínimo observado con cola fue 0.164 ms (CSV de mediciones), no un piso
+universal de 0.2 ms.
 
 Mismo municipio no garantiza cercanía por la red dirigida: Calarcá→RECUCA fija 6433
 nodos y tarda más con lineal que otros pares intramunicipales. Se conserva ese caso

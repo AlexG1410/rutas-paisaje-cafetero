@@ -1,4 +1,4 @@
-"""Figuras R1 desde CSV sintéticos, sin medir ni modificar resultados reales."""
+"""Figuras R1/R2 y análisis derivado desde CSV sintéticos, sin medir."""
 
 import matplotlib
 matplotlib.use("Agg")
@@ -16,6 +16,8 @@ def entorno(tmp_path, monkeypatch):
     destino = tmp_path / "figuras"
     monkeypatch.setattr(graficas, "RESULTS", origen.parent)
     monkeypatch.setattr(graficas, "FIGURAS", destino)
+    pd.DataFrame({"red": ["grafo_java", "grafo_java"], "V": [100, 100]}).to_csv(
+        origen / "memoria_representacion.csv", index=False)
     return origen / "tiempo_componente.csv", destino / "r1_tiempo_componente.png"
 
 
@@ -83,14 +85,32 @@ def test_t2fa_figura_dijkstra_dos_versiones_y_timeout(entorno, monkeypatch):
         return original(self, x, y, texto, *args, **kwargs)
 
     monkeypatch.setattr(Axes, "text", registrar)
+    from matplotlib.figure import Figure
+    guardar = Figure.savefig
+
+    def comprobar_figura(self, *args, **kwargs):
+        eje = self.axes[0]
+        assert eje.get_yscale() == "log"
+        assert eje.get_xlabel() == "Nodos explorados (cantidad)"
+        assert len(eje.collections) == 2
+        return guardar(self, *args, **kwargs)
+
+    monkeypatch.setattr(Figure, "savefig", comprobar_figura)
     graficas.ejecutar()
     assert (graficas.FIGURAS / "r2_tiempo_vs_explorados.png").read_bytes().startswith(b"\x89PNG")
     assert origen.read_bytes() == contenido
     assert any("no completada" in texto for texto in textos)
     assert not plt.get_fignums()
+    normalizacion = pd.read_csv(carpeta / "normalizacion_lineal.csv")
+    assert len(normalizacion) == 2
+    assert normalizacion.V.tolist() == [100, 100]
+    assert normalizacion.ns_por_posicion.iloc[0] == pytest.approx(4e6 / (30 * 100))
+    assert normalizacion.loc[1, ["nodos_explorados", "tiempo_ms", "ns_por_posicion"]].isna().all()
 
 
 @pytest.mark.parametrize("columna,valor", [("tiempo_ms", float("nan")),
+                                         ("tiempo_ms", 0),
+                                         ("nodos_explorados", 101),
                                          ("nodos_explorados", 0.5),
                                          ("version", "otra"), ("estado", "otra")])
 def test_t2fa_figura_rechaza_datos_invalidos(entorno, columna, valor):
@@ -104,3 +124,42 @@ def test_t2fa_figura_rechaza_datos_invalidos(entorno, columna, valor):
     with pytest.raises(ValueError):
         graficas.ejecutar()
     assert not (graficas.FIGURAS / "r2_tiempo_vs_explorados.png").exists()
+    assert not (carpeta / "normalizacion_lineal.csv").exists()
+
+
+@pytest.mark.parametrize("valores", [None, [], [0], [1.5], [float("inf")], [100, 101]])
+def test_t2nb_tamano_invalido_no_sobrescribe_salidas(entorno, valores):
+    origen_r1, _ = entorno
+    memoria = origen_r1.parent / "memoria_representacion.csv"
+    if valores is None:
+        memoria.unlink()
+    else:
+        pd.DataFrame({"red": ["grafo_java"] * len(valores), "V": valores}).to_csv(memoria, index=False)
+    carpeta = origen_r1.parent.parent / "r2"
+    carpeta.mkdir()
+    pd.DataFrame({"origen": ["a"], "destino": ["b"], "version": ["lineal"],
+                  "nodos_explorados": [30], "tiempo_ms": [4], "estado": ["completada"]}).to_csv(
+        carpeta / "mediciones_dijkstra.csv", index=False)
+    salida = carpeta / "normalizacion_lineal.csv"
+    salida.write_text("anterior", encoding="utf-8")
+    figura = graficas.FIGURAS / "r2_tiempo_vs_explorados.png"
+    figura.parent.mkdir(parents=True)
+    figura.write_bytes(b"anterior")
+    with pytest.raises((ValueError, FileNotFoundError)):
+        graficas.ejecutar()
+    assert salida.read_text(encoding="utf-8") == "anterior"
+    assert figura.read_bytes() == b"anterior"
+
+
+def test_t2fb_solo_timeout_sin_tiempos_logaritmicos_ficticios(entorno):
+    origen_r1, _ = entorno
+    carpeta = origen_r1.parent.parent / "r2"
+    carpeta.mkdir()
+    pd.DataFrame({"origen": ["a"], "destino": ["b"], "version": ["lineal"],
+                  "nodos_explorados": [None], "tiempo_ms": [None],
+                  "estado": ["no completada"]}).to_csv(carpeta / "mediciones_dijkstra.csv", index=False)
+    graficas.ejecutar()
+    tabla = pd.read_csv(carpeta / "normalizacion_lineal.csv")
+    assert tabla.loc[0, ["nodos_explorados", "tiempo_ms", "ns_por_posicion"]].isna().all()
+    assert (graficas.FIGURAS / "r2_tiempo_vs_explorados.png").exists()
+    assert not plt.get_fignums()

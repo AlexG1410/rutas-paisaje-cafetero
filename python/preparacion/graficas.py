@@ -2,7 +2,8 @@
 
 - results/figuras/r1_tiempo_componente.png     V + E vs tiempo (ms)
 - results/figuras/r2_tiempo_vs_explorados.png  nodos explorados vs tiempo (ms), una serie
-                                               por versión (lineal / cola_prioridad)
+                                                por versión, eje y logarítmico
+- results/r2/normalizacion_lineal.csv         T/(k·V) en ns, análisis derivado sin medir
 - results/figuras/r3_tiempos.png               (opcional) propio vs SciPy por conjunto
 - results/figuras/r4_tiempo_vs_k.png           k vs tiempo (ms), una curva por método, eje y
                                                logarítmico, "no completadas" marcadas
@@ -12,7 +13,7 @@ Contrato de R1.1 para futuros consumidores: results/r1/memoria_representacion.cs
 tiene red,representacion,supuesto_bytes,V,E,megabytes (ampliado con red, 2026-11-11).
 Seis filas: matriz/listas por descargada, componente_exportada y grafo_java.
 MB decimales estimados con modelo compacto; no son mediciones de memoria de la JVM.
-Este módulo todavía no lee ni grafica ese archivo.
+Para normalizar R2 se lee V de las filas grafo_java de ese archivo.
 """
 
 from __future__ import annotations
@@ -94,7 +95,7 @@ def graficar_componente() -> None:
 
 
 def graficar_dijkstra() -> None:
-    """R2: nodos fijados frente a tiempo; dos versiones y timeouts sin cifras ficticias."""
+    """R2: explorados frente a tiempo logarítmico y T/(k·V), sin nuevas mediciones."""
     archivo = RESULTS / "r2/mediciones_dijkstra.csv"
     tabla = pd.read_csv(archivo)
     requeridas = {"origen", "destino", "version", "nodos_explorados", "tiempo_ms", "estado"}
@@ -105,13 +106,26 @@ def graficar_dijkstra() -> None:
         raise ValueError(f"Versión o estado desconocido en {archivo}")
     completadas = tabla.loc[tabla.estado == "completada"]
     no_completadas = tabla.loc[tabla.estado == "no completada"]
+    n = _tamano_grafo_java()
     for fila in completadas.itertuples(index=False):
-        if (not math.isfinite(float(fila.tiempo_ms)) or fila.tiempo_ms < 0
+        if (not math.isfinite(float(fila.tiempo_ms)) or fila.tiempo_ms <= 0
                 or not math.isfinite(float(fila.nodos_explorados))
-                or fila.nodos_explorados < 1 or fila.nodos_explorados != int(fila.nodos_explorados)):
+                or not 1 <= fila.nodos_explorados <= n
+                or fila.nodos_explorados != int(fila.nodos_explorados)):
             raise ValueError(f"Tiempo o nodos explorados inválidos en {archivo}")
     if no_completadas[["tiempo_ms", "nodos_explorados"]].notna().any().any():
         raise ValueError("Las mediciones no completadas no deben contener cifras de rendimiento")
+    normalizacion = tabla.loc[tabla.version == "lineal",
+                              ["origen", "destino", "nodos_explorados", "tiempo_ms", "estado"]].copy()
+    normalizacion.insert(2, "V", n)
+    # Es el tiempo TOTAL normalizado: no aísla inicialización, barrido ni relajaciones.
+    normalizacion["ns_por_posicion"] = (
+        normalizacion.tiempo_ms * 1e6 / (normalizacion.nodos_explorados * n))
+    normalizacion = normalizacion[["origen", "destino", "V", "nodos_explorados",
+                                   "tiempo_ms", "ns_por_posicion", "estado"]]
+    for valor in normalizacion.loc[normalizacion.estado == "completada", "ns_por_posicion"]:
+        if not math.isfinite(float(valor)):
+            raise ValueError("Normalización no finita")
     FIGURAS.mkdir(parents=True, exist_ok=True)
     figura, eje = plt.subplots(figsize=(8, 5))
     try:
@@ -123,11 +137,34 @@ def graficar_dijkstra() -> None:
             eje.text(0.02, 0.97, f"{len(no_completadas)} no completadas (sin tiempo/nodos)",
                      transform=eje.transAxes, va="top", color="red")
         eje.set_title("Dijkstra: nodos explorados y tiempo de ejecución")
-        eje.set_xlabel("Nodos fijados (cantidad)")
-        eje.set_ylabel("Tiempo (ms)")
-        eje.grid(True, alpha=0.3)
+        eje.set_xlabel("Nodos explorados (cantidad)")
+        eje.set_yscale("log")
+        if completadas.empty:
+            # Ventana de dibujo sin datos ni marcas de tiempo, no tiempos experimentales.
+            eje.set_ylim(1, 10)
+            eje.set_yticks([], minor=False)
+            eje.set_yticks([], minor=True)
+            eje.text(0.5, 0.5, "Sin mediciones completadas", transform=eje.transAxes,
+                     ha="center")
+        eje.set_ylabel("Tiempo (ms, escala logarítmica)")
+        eje.grid(True, which="both", alpha=0.3)
         eje.legend()
         figura.tight_layout()
         figura.savefig(FIGURAS / "r2_tiempo_vs_explorados.png", dpi=150)
+        normalizacion.to_csv(RESULTS / "r2/normalizacion_lineal.csv", index=False)
     finally:
         plt.close(figura)
+
+
+def _tamano_grafo_java() -> int:
+    """Lee el tamaño documentado por Java sin reconstruir ni medir el grafo."""
+    archivo = RESULTS / "r1/memoria_representacion.csv"
+    tabla = pd.read_csv(archivo)
+    if not {"red", "V"}.issubset(tabla.columns):
+        raise ValueError(f"Faltan columnas red/V en {archivo}")
+    valores = pd.to_numeric(tabla.loc[tabla.red == "grafo_java", "V"], errors="raise")
+    if valores.empty or not all(math.isfinite(float(v)) and v > 0 and v == int(v) for v in valores):
+        raise ValueError(f"V de grafo_java debe ser entero positivo en {archivo}")
+    if valores.nunique() != 1:
+        raise ValueError(f"V de grafo_java inconsistente en {archivo}")
+    return int(valores.iloc[0])

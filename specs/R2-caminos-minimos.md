@@ -1,6 +1,8 @@
 # R2 — Caminos mínimos
 
 Estado: implementado, verificado y experimentado; análisis y figura disponibles (2026-11-12).
+Mejora experimental: figura logarítmica, terminología del enunciado y normalización
+T/(k·V) generada desde CSV, con discusión de inicialización y límites de inferencia.
 Responsable: _(asignar)_ · Peso: 20 %.
 
 Evidencia actual: 20 pares con cola, 10 también con lineal, 30 mediciones completadas
@@ -112,8 +114,23 @@ Archivos: `results/r2/pares.csv`, `mediciones_dijkstra.csv`, `cociente.csv`,
   coinciden` (L² filas). Aborta por discrepancias, IDs duplicados/faltantes, índices
   inválidos o archivos inconsistentes. La verificación no produce la matriz usada por R4.
 - Figura R2: `results/figuras/r2_tiempo_vs_explorados.png` desde mediciones CSV,
-  ambas versiones en una figura, eje x nodos fijados, eje y ms. Timeouts se anuncian
-  sin asignarles un tiempo ni cantidad de nodos ficticios.
+  ambas versiones en una figura, eje x «Nodos explorados (cantidad)», eje y tiempo en
+  ms con escala logarítmica. Explorados significa nodos fijados por primera vez, no
+  entradas obsoletas extraídas. Para esta figura se exigen tiempos completados >0;
+  cero no es representable en log y se rechaza sin sustituirlo por épsilon. Timeouts
+  se anuncian sin asignarles un tiempo ni cantidad de nodos ficticios.
+  Si todas son timeout, mostrar «Sin mediciones completadas» sin marcas numéricas
+  verticales; la ventana positiva necesaria para dibujar en log no representa datos.
+- Posprocesamiento aprobado (2026-11-12), sin nuevas mediciones: `python -m preparacion
+  graficas` también genera `results/r2/normalizacion_lineal.csv`, una fila por medición
+  lineal, columnas `origen,destino,V,nodos_explorados,tiempo_ms,ns_por_posicion,estado`.
+  `ns_por_posicion = tiempo_ms * 1e6 / (nodos_explorados * V)`. V se obtiene de las
+  filas `grafo_java` de `results/r1/memoria_representacion.csv`: deben existir y declarar
+  un mismo entero positivo. Exigir k entero en 1..V en las mediciones completadas.
+  En timeout se conservan IDs/V/estado y quedan vacíos k, tiempo y cociente. Validar
+  antes de sobrescribir las salidas R2; no modificar las mediciones de entrada. Este
+  CSV es análisis derivado, no un algoritmo propio ni una medición aislada del barrido.
+  No filtrar k<200 en el CSV: el umbral solo sirve para discutir los datos observados.
 
 ## Restricciones
 
@@ -147,6 +164,9 @@ dirigido, nodos 1..7 (en código 0..6): {1,2}=1, {2,3}=2, {4,5}=3, {6,7}=3, {1,4
 | T2.V-a | CSV Java sintético correcto (paralelas y asimetría) | verificación de pares/rutas y matriz sin HTTP | NetworkX |
 | T2.V-b | costo/ruta/matriz/IDs incorrectos | error o discrepancia explícita, sin corregir Java | verificación |
 | T2.F-a | resultados completados y timeout | figura con dos versiones y timeout indicado sin datos ficticios | Matplotlib |
+| T2.F-b | tiempos positivos, cero y timeout | escala logarítmica y etiqueta explorados; cero se rechaza | Matplotlib |
+| T2.N-a | V=100, k=30, T=4 ms y timeout | 1333.333… ns por posición; timeout sin cifras; entradas intactas | cálculo manual |
+| T2.N-b | V ausente/no entero/no finito/inconsistente, k>V | error antes de publicar salidas R2 | validación |
 
 ## Criterios de aceptación
 

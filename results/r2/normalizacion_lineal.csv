@@ -1,0 +1,11 @@
+origen,destino,V,nodos_explorados,tiempo_ms,ns_por_posicion,estado
+cab_pijao,ac_coocafeq_pijao,8791,3,0.548,20.778826830470557,completada
+fh_san_alberto,cab_buenavista,8791,14,0.784,6.370151291093164,completada
+fh_mirador_palmas,fh_mocawa_resort,8791,78,1.4043,2.047986139670817,completada
+atr_parque_cafe,ac_central_el_agrado,8791,94,1.3278,1.6068174172328082,completada
+cab_calarca,atr_recuca,8791,6433,80.2396,1.4188514343918606,completada
+atr_parque_vida,cab_armenia,8791,906,9.6433,1.2107631651174453,completada
+fh_mirador_palmas,cab_la_tebaida,8791,222,3.6817,1.8865014485535474,completada
+ac_coocafeq_calarca,fh_combia,8791,3417,39.8841,1.3277506956242362,completada
+ac_coocafeq_armenia,atr_parque_vida,8791,2904,34.1566,1.3379495621147723,completada
+atr_parque_fundadores,atr_museo_oro_quimbaya,8791,2136,30.8331,1.642017052680282,completada

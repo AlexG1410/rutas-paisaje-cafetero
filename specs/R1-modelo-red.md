@@ -1,79 +1,20 @@
 # R1 — Modelo de la red vial
 
-Estado: borrador · Responsable: _(asignar)_ · Peso: 15 % · Paquetes reorganizados: 2026-11-10 (sin cambio funcional)
+Estado (2026-11-12): R1.1–R1.5 implementados y experimento R1.3 ejecutado;
+documentación y figura disponibles, en revisión de cierre. Responsable: _(asignar)_ · Peso: 15 %.
 
-Avance parcial: búsqueda lineal de R1.4 implementada y verificada con T1.4-a a T1.4-f
-(2026-11-10): 6/6 casos aprobados. Infraestructura y arquitectura más R1.4: 32/32 aprobadas.
-La integración del catálogo real y el contraste OSMnx se completaron después (véase
-actualización de R1.4 abajo); otros pasos de R1 siguen pendientes.
-Descarga: configuración aprobada el 2026-11-10, implementada y con T1.D-a a T1.D-i
-aprobados (15 comprobaciones parametrizadas; suite Python 20/20). Adquisición real
-completada y GraphML releído: estructura y metadatos válidos. Segunda ejecución comprobada
-sin peticiones HTTP y sin cambios de contenido (SHA-256) ni fecha de modificación.
-R1.2: política aprobada e implementada; T1.2-a a T1.2-i verificados con 36 comprobaciones
-(suite Python 56/56). Pesos verificados en memoria sobre todas las aristas de la red real;
-GraphML original intacto. La exportación de pesos y porcentaje OSM sigue pendiente.
-Actualización R1.3/R1.5: procesamiento y exportación implementados, ejecutados sobre la
-red real y contrastados con Kosaraju. Java lee los CSV y construye `Grafo`; los pesos y
-el porcentaje OSM ya se exportan. Suite Python entonces 65/65. En esa etapa inicial
-`lugares_utm.csv` solo tenía cabecera; el catálogo se completó posteriormente.
-Mediciones R1.3 pendientes.
-Catálogo: el usuario incorporó los 40 lugares propuestos (12/15/8/5) con coordenadas,
-duraciones y verificación en mapa declarada por el grupo. `bootRun --args=catalogo`
-aprueba su validación estructural. Revisión preliminar de distancia a nodos detecta casos
->500 m revisados con observaciones del grupo. La sede principal de Quimbaya se sustituye
-por compra de café Pijao por indicación del grupo. El 2026-11-11 el integrante eligió
-un nuevo punto para Peñas Blancas y decidió conservar la finca El Agrado, sin adoptar
-las alternativas anteriores. Entrada exacta de recepción en El Agrado no confirmada:
-se conserva como limitación explícita, no como tarea bloqueante de selección de pin.
-No equivale a una certificación independiente de las entradas por la IA.
-`lugares_utm.csv` regenerado con los 40 IDs actuales, incluido Pijao. Propuesta y protocolo
-humano en `docs/propuesta-catalogo.md`.
-
-Actualización R1.4 (2026-11-11): asociación formal Java y reporte de lejanos generados por
-`bootRun --args=r1`. `verificar-lugares` contrasta los 40 índices y distancias con OSMnx:
-40/40 coinciden (`results/r1/verificacion_lugar_nodo.csv`). Cuatro alertas con notas de
-tratamiento en `results/r1/lugares_lejanos.csv`; no certifican accesos ni operación actual.
-Pruebas Python 74/74; Java completa 64: 41 aprobadas (incluida arquitectura) y 23 fallidas
-por implementaciones pendientes de R2–R4. R1.1 y mediciones R1.3 aún pendientes.
-
-Revisión posterior de accesos (2026-11-11): Cocora actualizado a `4.637694,-75.487470`
-y Combia al parqueadero indicado (`4.491763,-75.686133`). RECUCA y El Agrado se conservan
-con acceso vehicular confirmado por el integrante, sin certificación independiente.
-UTM, asociaciones y reportes regenerados: OSMnx sigue coincidiendo en 40/40 lugares;
-persisten las cuatro alertas geométricas >500 m. La llegada en vehículo declarada no
-elimina el umbral ni añade el último acceso al grafo.
-
-Diagnóstico posterior de esos puntos sobre la geometría del GraphML (2026-11-11):
-en Cocora la vía incluida pasa cerca del punto, mientras sus extremos están separados;
-en Combia la geometría vial incluida más cercana sigue apartada del parqueadero.
-No se ha identificado ni comprobado el recorrido del acceso de la hacienda en OSM.
-En ambos lugares la distancia mínima al nodo coincide entre la red cruda simplificada
-y la componente exportada: no se atribuye la alerta al filtrado de componente fuerte.
-Diagnóstico en memoria, no medición experimental ni cambio de asociación. Detalle de
-comprobación en `docs/registro-ia.md`.
-
-Actualización R1.1 (2026-11-11): comparación compacta implementada, probada y generada
-por `bootRun --args=r1` en `results/r1/memoria_representacion.csv`. Incluye descargada,
-componente exportada y grafo Java; se añadió `red` con aprobación del integrante.
-R1.1 ya no está pendiente. Suite Java completa: 68 pruebas, 45 aprobadas y 23 fallos
-conocidos de R2–R4 sin implementar; arquitectura aprobada. Python 74/74 y asociaciones
-OSMnx 40/40. Mediciones R1.3 aún pendientes, por lo que R1 no se declara completo.
-
-Revisión superficial (2026-11-11): alineación con enunciado y guías registrada en
-`docs/revision-superficial.md`. Estado de R1 sigue parcial; antes de medir SCC hay que
-aplicar el límite experimental también en Python. Pendientes de robustez de entrada
-Java y consolidación de textos históricos señalados, sin cambios de implementación.
-
-Avance del protocolo (2026-11-11): corregida la política >1 min también para
-repeticiones posteriores al calentamiento, en Python y Java. Python 77/77 y Java
-filtrado de R1/medición/arquitectura satisfactorio. No se ejecutaron experimentos;
-el límite de 5 min en Python continúa pendiente antes de R1.3 experimental.
-
-Actualización posterior (2026-11-11): `medicion.medir_con_limite` ya implementado y
-verificado, con límite por ejecución en proceso `spawn`, sin incluir arranque ni
-transferencias en el cronómetro. Suite Python 105/105. R1.3 todavía no está integrado
-ni ejecutado: debe usar este arnés y completar verificación/redes por radio/resultados.
+- Red descargada: 8877 nodos/20245 aristas; componente exportada: 8791/20132;
+  grafo Java sin paralelas redundantes: 8791/19997.
+- Catálogo: 40 lugares (12/15/8/5), con asociación Java contrastada contra OSMnx:
+  40/40 coincidencias y cuatro alertas >500 m que se conservan y explican.
+- Experimento SCC: cinco redes y cinco repeticiones por red, sin timeout. Tablas en
+  `results/r1/`, entorno en `results/maquina_python.csv`, figura en
+  `results/figuras/r1_tiempo_componente.png`.
+- Contratos y pruebas se definen abajo. La evidencia de ejecución y la evolución de
+  decisiones se conservan en `docs/registro-ia.md` y `docs/decisiones.md`, no como estados
+  históricos superpuestos en esta spec.
+- Pendientes de cierre: revisión final del documento y robustez de entradas Java
+  señalada en `docs/revision-superficial.md`. R2–R4 pendientes no se consideran fallos de R1.
 
 ## Objetivo
 
@@ -90,7 +31,7 @@ R1 se reparte entre Python (lo que exige OSMnx) y Java (lo propio y R1.1):
 | Descarga | Python · `preparacion.red.descargar` (`python -m preparacion descargar`) | `data/raw/quindio.graphml` (fuera de git) + fecha en metadatos |
 | Pesos (R1.2) | Python · `preparacion.red.asignar_pesos` | `velocidad_kmh`, `fuente_velocidad`, `tiempo_s` por arista |
 | Componente (R1.3) | Python · `preparacion.red.procesar` (`ox.truncate.largest_component`) | subgrafo SCC más grande |
-| Exportación (R1.5) | Python · `preparacion.red.exportar_red`, `exportar_lugares_utm` | `data/processed/{nodos,aristas}.csv.gz`, `lugares_utm.csv`, `metadatos.json` |
+| Exportación (R1.5) | Python · `preparacion.red.procesar` | `data/processed/{nodos,aristas}.csv.gz`, `lugares_utm.csv`, `metadatos.json` |
 | Medición R1.3 | Python · `preparacion.r1_componente` (`python -m preparacion r1`) | `results/r1/tamano_red.csv`, `tiempo_componente.csv` |
 | Lectura | Java · `repository` · `RedRepository.leer()` → `RedLeida` | — |
 | Grafo | Java · lógica · `RedService.grafo()` → `Grafo` (listas de adyacencia) | — |
@@ -208,6 +149,48 @@ para cada par (u, v) la de menor `tiempoS`. Documentarlo en el R1.1.
    generado por OSMnx. No redondea tiempos durante este paso.
 
 ### R1.3 Componente fuertemente conexa
+
+Contrato experimental aprobado (2026-11-11): `python -m preparacion r1` reutiliza
+`quindio.graphml` y adquiere/reutiliza `data/raw/r1/armenia_{2,5,10,20}km.graphml`.
+Centro: única fila `cab_armenia` del catálogo, coordenadas finitas y geográficas válidas.
+Descarga explícita `dist_type="bbox"`, `dist=radio_km*1000`, `network_type="drive"`,
+`retain_all=True`, `simplify=True`: cuadrados, no discos ni distancias por carretera.
+Cada GraphML conserva `metadatos_descarga` con centro, radio, opciones, fecha UTC,
+versiones y conteos. Copias inválidas abortan sin redescarga ni sobrescritura; escritura
+temporal validada antes de publicar. No altera red departamental ni `data/processed`.
+
+Antes de medir cada red, contrastar la partición SCC de NetworkX con Kosaraju y la
+componente OSMnx con el máximo tamaño (aceptar empates); comprobar subgrafo inducido
+con todas las aristas paralelas. Después, medir solo `largest_component(strongly=True)`
+con `medir_con_limite` y validar también el resultado medido. Si una verificación falla,
+abortar antes de publicar resultados. Preparar las cinco redes antes de iniciar mediciones.
+Guardar `results/maquina_python.csv` antes de medir.
+
+`tamano_red.csv`: `red,nodos,aristas`, dos filas por zona, sufijos `_descargada` y
+`_componente`; `tiempo_componente.csv`: `red,V,E,V_mas_E,tiempo_ms,repeticiones,estado`.
+Zonas: `armenia_2km`, `armenia_5km`, `armenia_10km`, `armenia_20km`, `quindio`.
+V/E de tiempos son de la red de entrada; no se deduplican aristas. Timeout conserva
+conteos verificados previamente, pero deja tiempo vacío. Publicar tablas solo tras
+completar la serie sin errores; un timeout experimental no es error de infraestructura.
+La figura se genera con `python -m preparacion graficas`, exclusivamente desde el CSV;
+el documento presenta tiempos redondeados a un decimal y cocientes tiempo/(V+E).
+Los CSV conservan la precisión original, sin edición manual.
+La figura distingue ejecuciones `completada` de `no completada`: las últimas se
+marcan sin atribuirles un tiempo de cero ni inventar su duración. Rechaza CSV vacíos,
+columnas faltantes y tiempos no finitos para ejecuciones completadas.
+
+| ID | Prueba experimental sin HTTP | Esperado |
+|---|---|---|
+| T1.E-a | adquisición con OSMnx simulado y persistencia GraphML real | opciones exactas; reutilización sin HTTP ni cambios |
+| T1.E-b | copia corrupta/metadatos distintos o centro inválido | aborta sin sobrescribir ni descargar |
+| T1.E-c | SCC con paralelas y empate de máximos | acepta máximo inducido; rechaza resultado incorrecto |
+| T1.E-d | serie con medidor simulado y timeout | tablas y máquina; solo función OSMnx al medidor; no cambia entradas |
+| T1.E-e | verificación fallida | no mide ni publica tablas |
+| T1.F-a | CSV completo con filas fuera de orden | genera PNG desde CSV sin modificarlo |
+| T1.F-b | ejecución no completada con tiempo vacío | marca explícita sin tiempo ficticio |
+| T1.F-c | columnas faltantes, datos vacíos/no finitos | error sin generar figura |
+| T1.C-a | catálogo actual | conserva coordenadas acordadas y fuente uniforme; sin bitácora individual en notas |
+
 1. Obtenerla con `ox.truncate.largest_component(G, strongly=True)` (aquí sí se usa la
    librería, lo pide el enunciado).
 2. **Investigar el algoritmo interno en la versión instalada**. Revisar el código fuente:
@@ -282,9 +265,16 @@ documentar qué se usó.
 - Antes de escribir, valida el catálogo, la igualdad de IDs con `lugares_utm.csv`,
   coordenadas finitas y la forma no vacía del grafo. Calcula todas las asociaciones con
   `NodoMasCercano.buscar`, en orden del catálogo. `mas_de_500m` es `distancia_m > 500`,
-  no `>= 500`. Conserva en `tratamiento` las notas del catálogo; si un caso lejano carece
-  de notas, escribe `Pendiente: revisar acceso y justificar distancia al nodo`.
-  Ese texto pendiente NO certifica que el caso esté aceptado ni resuelto.
+   no `>= 500`. Conserva en `tratamiento` las notas del catálogo; si un caso lejano carece
+   de notas, aborta con `IllegalStateException` identificando el lugar, antes de escribir
+   cualquier salida. No genera tratamientos ficticios ni textos «Pendiente».
+- El catálogo usa en `fuente_coordenadas` el formato `Google Maps; revisado en mapa por
+  el grupo (AAAA-MM-DD)`, conservando las fechas de las revisiones declaradas. Las notas
+  describen el punto y, si corresponde, su tratamiento geométrico, sin atribuciones
+  individuales ni bitácora. Las limitaciones generales del modelo van al documento.
+- Puntos acordados: Peñas Blancas `4.481609,-75.634164`, Cocora `4.637694,-75.487470`,
+  Combia `4.491763,-75.686133`, RECUCA `4.4326046,-75.7332347`,
+  El Agrado `4.5180079,-75.7926973`. No se mueven para reducir alertas.
 - Guarda `lugares_nodos.csv` para todos los lugares y `results/r1/lugares_lejanos.csv`
   solo para los lejanos, ambos con `id_lugar,idx_nodo,distancia_m,mas_de_500m,tratamiento`.
   Con cero lejanos, el segundo archivo contiene solo cabecera, sin filas ficticias.
@@ -303,7 +293,7 @@ documentar qué se usó.
   incompletos o mal formados abortan antes de generar el reporte. No es una medición.
 
 ### R1.5 Grafo procesado
-1. Exportar con `preparacion.red.exportar_red` (formato arriba). El resto del proyecto
+1. Exportar con `preparacion.red.procesar` (formato arriba). El resto del proyecto
    **solo** lee estos archivos (`RedRepository` → `RedService`), nunca vuelve a descargar.
 2. Reportar nodos y aristas antes y después de filtrar la componente
    (`results/r1/tamano_red.csv`).
@@ -357,6 +347,7 @@ documentar qué se usó.
 | T1.I-b | ningún lugar lejano | CSV de lejanos solo con cabecera | archivo temporal |
 | T1.I-c | UTM faltante, sobrante o no finita; catálogo inválido | aborta sin sobrescribir asociaciones | validación |
 | T1.I-d | nodos con coordenadas inválidas | aborta sin exportar | validación |
+| T1.I-e | lugar a >500 m sin notas | error con ID; no sobrescribe asociaciones, reporte ni memoria | validación |
 | T1.V-a | CSV sintético de Java correcto | índices y distancias coinciden con OSMnx, sin red | OSMnx real |
 | T1.V-b | índice o distancia Java incorrectos | reporte con discrepancia y error | archivo de prueba |
 | T1.V-c | IDs repetidos/faltantes, índice inválido o UTM desactualizado | aborta antes de reporte | validación |
@@ -366,12 +357,12 @@ documentar qué se usó.
 
 - [x] Descarga cruda: GraphML real guardado, leído y reutilizado sin peticiones ni sobrescritura.
 - [x] Componente y CSV de red generados por `procesar`, validados y leídos desde Java.
-- [ ] `data/processed/` generado y versionado; `metadatos.json` con fecha de descarga.
-- [ ] `results/r1/tamano_red.csv` y `tiempo_componente.csv` (`python -m preparacion r1`);
+- [x] `data/processed/` generado y versionado; `metadatos.json` con fecha de descarga.
+- [x] `results/r1/tamano_red.csv` y `tiempo_componente.csv` (`python -m preparacion r1`);
       `memoria_representacion.csv` y `lugares_lejanos.csv` (`./gradlew bootRun --args='r1'`);
       `verificacion_lugar_nodo.csv` sin diferencias (`python -m preparacion verificar-lugares`).
-- [ ] Pruebas T1.* en verde (`NodoMasCercanoTest`, `RepositoriosTest`, `GrafoTest`).
-- [x] Búsqueda de R1.4: T1.4-a a T1.4-f aprobadas; falta verificar con OSMnx en la red real.
+- [x] Pruebas T1.* en verde (`NodoMasCercanoTest`, `RepositoriosTest`, `GrafoTest`).
+- [x] Búsqueda de R1.4: T1.4-a a T1.4-f aprobadas; contraste OSMnx real: 40/40 coinciden.
 - [ ] Documento: supuestos de memoria, elección justificada, origen de velocidades,
       algoritmo de SCC con fuente y complejidad, tabla y discusión de tiempos.
 
@@ -391,6 +382,7 @@ Figura `results/figuras/r1_tiempo_componente.png` (V+E en x, tiempo en ms en y).
 
 1. **Velocidades**: decisión tomada; imputación OSMnx y mínimo de límites múltiples,
    según R1.2. No se usa una tabla normativa como si representara velocidades observadas.
-2. `retain_all=True` y `simplify=True` aprobados para la red departamental. Falta definir
-   explícitamente las opciones y `dist_type` de `graph_from_point` para los experimentos.
-3. Tratamiento de los lugares a más de 500 m.
+2. Resuelta (2026-11-11): redes experimentales con `drive`, `retain_all=True`,
+   `simplify=True`, `dist_type="bbox"`; cuadrados centrados en `cab_armenia`.
+3. Lugares a más de 500 m: se mantienen y explican las cuatro alertas de R1.4;
+   acceso vehicular declarado no equivale a comprobar la entrada exacta ni la operación actual.

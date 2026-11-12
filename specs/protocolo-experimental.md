@@ -35,11 +35,9 @@ Casos de prueba del arnés (umbrales reducidos o reloj simulado, no experimentos
 | P6.3-c | tiempo exactamente igual al umbral (reloj simulado Python) | continuar las cinco repeticiones |
 | P6.3-d | casos a/b en JVM aislada | misma política, sin cambiar límite ni canal de resultados |
 
-Estado de esta corrección (2026-11-11): implementada y verificada en Python y Java,
-incluida la JVM aislada. Pruebas añadidas antes de implementar reprodujeron el fallo;
-después pasan P6.3-a a d. Suite Python 77/77 y Java filtrado de R1/medición/arquitectura
-satisfactorio. El corte de 5 min en Python sigue pendiente; esta corrección no debe
-presentarse como cierre del protocolo. No se generaron mediciones experimentales.
+Estado: implementada y verificada en Python y Java, incluida la JVM aislada.
+El corte Python de cinco minutos también está implementado (sección siguiente).
+La evidencia e historial de verificaciones están en `docs/registro-ia.md`.
 
 - Medir siempre con `./gradlew bootRun --args='rN'`: fija `-Xms2g -Xmx2g -Xss16m` y el
   directorio de trabajo. Nunca medir desde JUnit, el IDE o el depurador.
@@ -52,7 +50,7 @@ presentarse como cierre del protocolo. No se generaron mediciones experimentales
 
 ### Contrato
 
-Contrato nuevo, previo a implementar: `preparacion.medicion.medir_con_limite(fn, *args,
+Contrato: `preparacion.medicion.medir_con_limite(fn, *args,
 repeticiones=REPETICIONES, calentamientos=CALENTAMIENTOS,
 umbral_una_s=UMBRAL_UNA_SOLA_MEDICION_S, limite_s=LIMITE_TIEMPO_S, **kwargs) -> Medicion`.
 Conserva `medir` para uso directo; los experimentos R1.3 y SciPy deberán usar la versión
@@ -99,7 +97,7 @@ casos fallaron por función ausente antes de implementar; P6.7-a a i pasan despu
 incluidos errores de serialización/deserialización. Suite Python completa: 105/105.
 Pruebas Java filtradas de R1/medición/arquitectura satisfactorias (tarea sin cambios).
 Estos casos usan tareas sintéticas y un grafo OSMnx pequeño, no son mediciones del
-proyecto. R1.3 experimental y la integración SciPy siguen pendientes.
+proyecto. R1.3 ya está integrado y ejecutado; la integración SciPy sigue pendiente.
 
 Fuente de `spawn`, `Pipe`, `terminate`, `join` y serialización: documentación oficial
 Python 3.14 de `multiprocessing` (enlace y alcance en `docs/fuentes.md`). El hijo es

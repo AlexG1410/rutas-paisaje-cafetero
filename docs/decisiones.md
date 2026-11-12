@@ -71,7 +71,7 @@ también la tabla de la sección 10 de `AGENTS.md`.
   metadatos incorporados; un archivo válido se reutiliza sin sobrescribir su fecha.
   La fecha corresponde a la adquisición local y no a una instantánea histórica de OSM;
   se registra si estaba habilitada la caché HTTP de OSMnx. Las opciones para las redes
-  por radio todavía no se deciden en esta etapa; velocidades resueltas posteriormente en D8.
+   por radio se aprobaron posteriormente en D12; velocidades resueltas en D8.
 
 ## D10. Aplicación: REST + página estática con Leaflet — tomada (2026-11-07)
 - Controladores REST que devuelven JSON y una página HTML/JavaScript con Leaflet servida por
@@ -80,3 +80,16 @@ también la tabla de la sección 10 de `AGENTS.md`.
 ## D11. Resultados en CSV — tomada
 - Todos los resultados (incluida la máquina) en CSV para leerlos igual desde Java, Python y la
   app; el enunciado permite CSV o JSON.
+
+## D12. Redes experimentales R1.3 con bbox — tomada (2026-11-11)
+- Aprobado por el integrante: `graph_from_point` centrado en `cab_armenia` del catálogo,
+  con `dist` de 2000/5000/10000/20000 m, `dist_type="bbox"`, `network_type="drive"`,
+  `retain_all=True`, `simplify=True`. Son cuadrados, no círculos ni distancias de recorrido.
+- Se guardan aparte en `data/raw/r1/`, con procedencia y versiones, sin modificar el
+  GraphML departamental ni los CSV de rutas. Copias válidas se reutilizan; inválidas
+  abortan sin sobrescritura. La descarga no forma parte del tiempo medido.
+- Antes de medir se contrastan particiones SCC con Kosaraju. Se mide la función completa
+  `ox.truncate.largest_component(strongly=True)`, no solo el recorrido interno de SCC.
+  El medidor aislado aplica límite por ejecución, incluido calentamiento.
+- Las zonas pueden diferir en densidad, proporción conexa y atributos; la gráfica no
+  constituye por sí sola una prueba de complejidad ni una comparación de algoritmos propios.

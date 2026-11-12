@@ -181,7 +181,18 @@ y grafo Java deduplicado. Cabecera: `red,representacion,supuesto_bytes,V,E,megab
 MB decimales, sin medir memoria real de objetos JVM. Los conteos de `metadatos.json`
 deben ser compatibles con los CSV procesados; no se escriben salidas ante errores
 de validación. No se descarga nada ni se modifican las coordenadas del catálogo.
-Las mediciones de R1.3 siguen pendientes. Suite Python actual: 105/105. La última suite
+R1.3 ya tiene preparación y experimento implementados: `python -m preparacion r1`
+reutiliza la red departamental y adquiere/reutiliza cuatro cuadrados `bbox` centrados
+en `cab_armenia` (2/5/10/20 km hasta sus límites, no círculos). Conserva GraphML y
+metadatos separados en `data/raw/r1/`, sin alterar la red de producción. Verifica con
+Kosaraju antes de medir y genera `results/r1/{tamano_red,tiempo_componente}.csv` y datos
+de máquina. La primera adquisición necesita internet; copias inválidas abortan sin
+sobrescritura. Ejecución real del 2026-11-11 completada: cinco redes con cinco
+repeticiones cada una. Tablas, datos de máquina y figura disponibles; el documento incluye
+el cociente tiempo/(V+E) y su discusión. Las cuatro copias reales se reutilizaron sin HTTP ni cambios de hash/fecha;
+el hash del GraphML departamental sigue coincidiendo con el original.
+
+Suite Python actual: **126/126**, con regresiones de catálogo, figura e integración R1.3. La última suite
 Java completa ejecutada antes de los cambios del protocolo tuvo 45/68 aprobadas y 23
 fallidas por algoritmos R2–R4 pendientes; los tests filtrados de R1/medición/arquitectura
 son satisfactorios tras corregir el protocolo. No equivale a suite completa verde.
@@ -196,8 +207,8 @@ devuelve `no completada`, sin mediana ni resultado parcial utilizable.
 
 Las tareas y datos deben ser serializables y las funciones importables (sin lambdas).
 Usar desde módulos/CLI con guardia `if __name__ == "__main__"`, no definir las tareas en
-un comando interactivo `python -c`. No añade dependencias. R1.3 y SciPy todavía deben
-integrarse: disponer del arnés no significa que existan mediciones experimentales.
+un comando interactivo `python -c`. No añade dependencias. Falta integrarlo en SciPy;
+R1.3 ya está integrado y su primera ejecución real está verificada.
 
 ## Aplicación (R5)
 

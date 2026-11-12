@@ -195,16 +195,24 @@ class ExperimentoR1ServiceTest {
         assertFalse(Files.exists(carpeta.resolve("lugares_nodos.csv")));
     }
 
-    @Test void t1ia_lejanoSinNotasQuedaPendiente() {
+    @Test void t1ie_lejanoSinNotasNoSobrescribeSalidas() throws Exception {
         var servicio = preparar(1700);
         var filas = new ArrayList<>(Csv.leer(carpeta.resolve("catalogo.csv")));
         filas.getFirst().put("notas", "");
         Csv.escribir(carpeta.resolve("catalogo.csv"), CatalogoRepository.COLUMNAS,
                 filas.stream().map(f -> CatalogoRepository.COLUMNAS.stream().map(f::get).toList())
                         .toList());
-        servicio.ejecutar();
-        var asociaciones = new LugaresNodosRepository(carpeta.resolve("lugares_nodos.csv")).leer();
-        assertEquals("Pendiente: revisar acceso y justificar distancia al nodo",
-                asociaciones.getFirst().tratamiento());
+        var asociaciones = carpeta.resolve("lugares_nodos.csv");
+        var reporte = carpeta.resolve("results/r1/lugares_lejanos.csv");
+        var memoria = carpeta.resolve("results/r1/memoria_representacion.csv");
+        Files.createDirectories(reporte.getParent());
+        Files.writeString(asociaciones, "asociaciones anteriores");
+        Files.writeString(reporte, "reporte anterior");
+        Files.writeString(memoria, "memoria anterior");
+        var error = assertThrows(IllegalStateException.class, servicio::ejecutar);
+        assertTrue(error.getMessage().contains("l0"));
+        assertEquals("asociaciones anteriores", Files.readString(asociaciones));
+        assertEquals("reporte anterior", Files.readString(reporte));
+        assertEquals("memoria anterior", Files.readString(memoria));
     }
 }

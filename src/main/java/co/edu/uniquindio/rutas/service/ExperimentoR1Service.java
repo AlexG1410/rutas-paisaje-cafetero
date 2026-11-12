@@ -87,7 +87,8 @@ public class ExperimentoR1Service {
             boolean lejano = cercano.distanciaM() > Constantes.UMBRAL_LUGAR_NODO_M;
             String tratamiento = fila.notas() == null ? "" : fila.notas();
             if (lejano && tratamiento.isBlank()) {
-                tratamiento = "Pendiente: revisar acceso y justificar distancia al nodo";
+                throw new IllegalStateException(
+                        "Falta justificar la distancia mayor de 500 m para " + fila.id());
             }
             asociaciones.add(new FilaLugarNodo(fila.id(), cercano.indice(),
                     cercano.distanciaM(), lejano, tratamiento));

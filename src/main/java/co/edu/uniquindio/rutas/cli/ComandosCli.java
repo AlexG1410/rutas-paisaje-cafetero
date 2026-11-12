@@ -35,7 +35,8 @@ public class ComandosCli implements CommandLineRunner {
             r1.ejecutar();
             System.out.println("R1.4: asociaciones y lugares lejanos exportados. "
                     + "Ejecutar python -m preparacion verificar-lugares. "
-                    + "R1.1: memoria estimada exportada (no consumo real JVM). Mediciones R1.3 pendientes.");
+                    + "R1.1: memoria estimada exportada (no consumo real JVM). "
+                    + "R1.3 se ejecuta por separado: python -m preparacion r1.");
         }));
         comandos.put("r2", new Comando("Dijkstra: mediciones, cociente y matriz de tiempos",
                 r2::ejecutar));

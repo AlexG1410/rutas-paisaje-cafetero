@@ -27,7 +27,8 @@ válida, se informa el error en lugar de eliminarla o sobrescribirla.
 
 Los casos T1.D-a a T1.D-i verifican estas garantías sin peticiones HTTP: se simula la
 respuesta de descarga y se prueba el formato GraphML real con OSMnx. Descargar no es
-una medición de algoritmos; todavía faltan el procesamiento y los experimentos de R1.
+una medición de algoritmos. El procesamiento y la exportación ya están implementados;
+el experimento de tiempos de R1.3 ya se ejecutó y verificó el 2026-11-11.
 
 ## 2.2 Representación (R1.1)
 
@@ -101,9 +102,10 @@ valores calculados a mano y OSMnx real, sin peticiones HTTP.
 
 Este tiempo es una estimación del modelo: los límites señalizados no son velocidades
 observadas y no se modelan tráfico, semáforos ni pendientes. La elección de la red y de
-su clasificación también condiciona las rutas. **Pendiente:** porcentaje de velocidades
-OSM y resultados exportados mediante el procesamiento reproducible; no se incorporan
-aquí cifras experimentales obtenidas únicamente en una comprobación en memoria.
+su clasificación también condiciona las rutas. En la red exportada, el 6,47 % de las
+aristas conserva una velocidad válida procedente de OSM; el 93,53 % restante usa
+imputación según la política descrita. El porcentaje procede de
+`data/processed/metadatos.json` y caracteriza esta descarga, no todas las redes viales.
 
 ## 2.4 Componente fuertemente conexa (R1.3)
 
@@ -130,27 +132,90 @@ cuesta O(Vc + Ec), acotado por O(V + E). El costo total de la función sigue sie
 O(V + E), suponiendo operaciones esperadas constantes en mapas/conjuntos. La memoria
 incluyendo el grafo de salida es O(V + E); no confundirla con el estado O(V) del recorrido.
 Esto es un análisis del código, no una complejidad declarada explícitamente en la página
-de referencia. **La medición experimental aún está pendiente.**
+de referencia. Los resultados reales se presentan a continuación; no prueban por sí
+solos la cota teórica.
+
+### Diseño experimental implementado
+
+El comando `python -m preparacion r1` utiliza cuatro redes de `graph_from_point` desde
+las coordenadas de `cab_armenia` del catálogo y la descarga departamental preservada.
+Se especifican `dist=2000/5000/10000/20000`, `dist_type="bbox"`, `network_type="drive"`,
+`retain_all=True` y `simplify=True`. Las zonas son cuadrados definidos por la distancia
+del centro a sus límites, no círculos ni isócronas. No se descartan previamente las
+componentes débiles. Los GraphML experimentales van a `data/raw/r1/`, separados de los
+datos usados para planear rutas, con centro, opciones, conteos, versiones y adquisición UTC.
+
+Antes de medir todas las redes, se comparan las particiones de componentes producidas
+por NetworkX y Kosaraju, y se comprueba que OSMnx devuelve una componente de tamaño
+máximo e inducida con todas las aristas paralelas. En un empate se acepta cualquiera
+de las componentes máximas. La misma comprobación del resultado se repite después de
+medir, fuera del cronómetro. Estas verificaciones no implementan SCC propia en Python.
+
+`medir_con_limite` ejecuta la función OSMnx en un proceso `spawn` por serie, con un
+calentamiento y cinco repeticiones, mediana en milisegundos. Cualquier ejecución
+terminada de más de 60 s sustituye las muestras previas y detiene la serie; si excede
+300 s se termina el hijo y se registra «no completada», sin tiempo. Descarga, lectura,
+preparación, recolección de basura, serialización y verificación quedan fuera del
+tiempo registrado. Se mide la función completa de OSMnx, incluyendo su comprobación
+de conectividad y eventual copia, no exclusivamente el recorrido Tarjan.
+
+Las tablas se generan en `results/r1/tamano_red.csv` y `tiempo_componente.csv`, con
+V/E de entrada y sin deduplicar paralelas; `results/maquina_python.csv` identifica el
+entorno. Los tamaños de la componente se obtienen en la verificación previa, incluso
+si la medición posterior excede el límite. No se publican medianas parciales como si
+hubieran completado la serie. Las cinco redes terminaron con cinco repeticiones medidas.
+La adquisición y la verificación se realizan antes del experimento, sin ejecutar pruebas
+simultáneamente a las mediciones.
 
 Dentro de la componente existe camino dirigido entre cualquier par de nodos, por lo que
 la matriz de tiempos no tendrá infinitos por falta de camino para lugares asociados a
-esos nodos. Esto no garantiza proximidad de todos los lugares originales: sus distancias
-de asociación y casos de más de 500 m se evaluarán cuando el catálogo tenga coordenadas.
+esos nodos. Esto no garantiza proximidad de todos los lugares originales: el catálogo
+ya fue asociado y verificado contra OSMnx, con cuatro alertas de más de 500 m que deben
+explicarse, no eliminarse moviendo puntos sin evidencia de acceso.
 
 | Red | Nodos | Aristas |
 |---|---|---|
-| Red descargada | … | … |
-| Componente fuertemente conexa | … | … |
+| Red departamental descargada | 8877 | 20245 |
+| Componente fuertemente conexa departamental | 8791 | 20132 |
+
+Fuente: `results/r1/tamano_red.csv`, generado por `python -m preparacion r1`.
 
 | Red | V | E | V + E | Tiempo (ms) |
 |---|---|---|---|---|
-| Radio de 2 km | … | … | … | … |
-| Radio de 5 km | … | … | … | … |
-| Radio de 10 km | … | … | … | … |
-| Radio de 20 km | … | … | … | … |
-| Departamento completo | … | … | … | … |
+| Bbox de 2 km | 1653 | 3649 | 5302 | 267.5 |
+| Bbox de 5 km | 4320 | 9726 | 14046 | 982.4 |
+| Bbox de 10 km | 6002 | 13486 | 19488 | 1213.2 |
+| Bbox de 20 km | 8849 | 20139 | 28988 | 2008.3 |
+| Departamento completo | 8877 | 20245 | 29122 | 2004.8 |
 
-Discusión: ¿el tiempo crece como predice la complejidad?
+Fuente: `results/r1/tiempo_componente.csv`; medianas de cinco repeticiones, estado
+`completada` en todas las filas. Entorno: `results/maquina_python.csv`.
+Los tiempos aumentan en general con V+E, pero el departamento es ligeramente más
+rápido que bbox de 20 km pese a tener más nodos/aristas. Esto no contradice una cota
+asintótica: intervienen la forma de la red, atributos copiados y variabilidad de ejecución.
+La red de 20 km y la departamental tienen tamaños muy cercanos (8849 frente a 8877 nodos),
+por lo que aportan dos observaciones de escala similar, no dos incrementos independientes
+del tamaño. Se conservan ambas porque el enunciado fija esos radios y la red departamental.
+La cercanía de los conteos no implica que las dos zonas tengan idéntica cobertura.
+
+| Red | Tiempo/(V+E) (ms por elemento) |
+|---|---:|
+| Bbox de 2 km | 0.0504 |
+| Bbox de 5 km | 0.0699 |
+| Bbox de 10 km | 0.0623 |
+| Bbox de 20 km | 0.0693 |
+| Departamento completo | 0.0688 |
+
+El cociente no es constante en estas cinco muestras, pero se mantiene en el mismo
+orden de magnitud. Estos cocientes se calculan con los tiempos sin redondear del CSV,
+no con las cifras de un decimal de la tabla de presentación.
+
+![Tiempo de selección de la componente frente a V + E](../../results/figuras/r1_tiempo_componente.png)
+
+La figura se genera desde `results/r1/tiempo_componente.csv` con
+`python -m preparacion graficas`. Los dos puntos superiores representan redes de tamaño
+similar; no permiten concluir un cambio de tendencia asintótica. El rango de cocientes
+y el número limitado de redes son compatibles con crecimiento lineal, sin demostrarlo.
 
 ### Exportación de la componente (R1.5)
 
@@ -167,7 +232,7 @@ porcentaje de velocidades OSM sobre las aristas exportadas. `Grafo` deduplica de
 las paralelas por menor tiempo en Java; sus conteos no deben confundirse con filas CSV.
 Los lugares con coordenadas completas se proyectan; si faltan todas, se exporta solo la
 cabecera y se avisa, sin completar coordenadas artificialmente ni declarar válido el
-catálogo. Las tablas experimentales anteriores siguen pendientes de comandos de R1.
+catálogo. Las tablas anteriores proceden del comando experimental de R1.3.
 
 ## 2.5 Ubicación de los lugares (R1.4)
 
@@ -231,46 +296,24 @@ y guarda una fila por lugar. Por conteo propio, además del costo Θ(L·V) de la
 requiere O(V + L) espacio auxiliar para copias y filas, sin contar el grafo ya cargado.
 Esto no contradice la memoria Θ(1) de una búsqueda individual.
 
-### Tratamiento de accesos revisado con el grupo
+### Tratamiento de las alertas y alcance del modelo
 
-El grupo confirmó puntos y distinguió accesos vehiculares de marcadores generales. El
-2026-11-11 actualizó Cocora a `4.637694, -75.487470` y Combia al parqueadero de la hacienda
-(`4.491763, -75.686133`). Conservó RECUCA y confirmó acceso vehicular aunque no pudo
-inspeccionar el camino en Google Maps; este punto sigue siendo un marcador general.
-También confirmó acceso vehicular sin inconvenientes a la finca El Agrado. Estas son
-declaraciones del integrante, no comprobaciones independientes del acceso por el agente.
-El integrante corrigió Peñas Blancas desde el alto
-a un punto elegido para el acceso, y decidió conservar la ubicación de la finca El Agrado
-según su conocimiento del proceso allí realizado. La entrada exacta de recepción de café
-no está confirmada; se registra como limitación, no como acceso certificado. Las dos
-alternativas comparadas previamente no se adoptan.
-No se elige un punto solo porque reduce la distancia a la red. La sede administrativa
-de Quimbaya se reemplaza por el punto de compra de café de Pijao, indicado por el grupo.
+Se mantienen los cuatro puntos y sus asociaciones, sin insertar conexiones artificiales:
 
-La inspección del GraphML descargado encuentra las vías «Salento - Valle de Cocora» y
-«Calle Larga» dentro de la componente. En particular, RECUCA está próximo a la geometría
-de esta última aunque quede lejos de un nodo. La simplificación conserva la geometría
-del tramo entre nodos y puede explicar esta diferencia. Esto no prueba accesibilidad
-del predio, permisos de ingreso o cobertura exacta del último tramo.
+- **Cocora:** el punto de llegada está cerca de la vía incluida «Salento - Valle de
+  Cocora», pero separado de los extremos de la arista simplificada. Sus vértices
+  geométricos intermedios no son nodos consultables por la búsqueda Java.
+- **RECUCA:** se utiliza el marcador general del atractivo. La vía «Calle Larga» está
+  incluida; la proximidad a su geometría no implica proximidad a un nodo.
+- **Combia:** se utiliza el parqueadero. La distancia al nodo es una separación
+  geométrica, no una longitud de recorrido por el acceso a la hacienda.
+- **El Agrado:** se utiliza la ubicación de la finca, cuyo marcador no distingue la
+  entrada de recepción de café. Se conserva el nodo asociado y se reporta la distancia.
 
-La revisión geométrica del nuevo punto de Cocora confirma que está próximo a la vía
-incluida «Salento - Valle de Cocora», pero lejos de los extremos de esa arista. Los
-vértices intermedios de su geometría no son nodos consultables por `NodoMasCercano`.
-Para el parqueadero actualizado de Combia, la vía incluida más próxima es «Vía La
-Española - Calarcá» y sigue apartada del punto; este diagnóstico no identifica ni
-certifica el recorrido del acceso vehicular a la hacienda. No se deduce su categoría
-OSM a partir de la etiqueta de esa carretera próxima.
-
-En ambos puntos la distancia mínima a nodos coincide entre el GraphML crudo
-(ya simplificado al descargar) y la componente exportada. Por tanto, su alerta no
-se explica por nodos eliminados al seleccionar la componente fuerte. Estas consultas
-geométricas son diagnósticas, no mediciones experimentales ni correcciones del grafo.
-
-El filtro `drive` de OSMnx 2.1.1 excluye, entre otras etiquetas, `highway=track` y
-`highway=service` (código fuente verificado en `docs/fuentes.md`). Esa regla general NO
-demuestra que un acceso particular tenga alguna de esas etiquetas. Para Combia se
-registra acceso privado/rural declarado por el grupo, sin atribuir una etiqueta OSM no
-comprobada. No se ha descargado otra red ni se han insertado conexiones artificiales.
+Las coordenadas son las revisadas en mapa por el grupo. Esa revisión no equivale a un
+levantamiento de accesos ni a una comprobación de operación actual de los predios.
+No se atribuyen etiquetas `track` o `service` a accesos particulares sin datos que lo
+sustenten. Una alerta geométrica por sí sola no demuestra que `drive` haya excluido la vía.
 
 La asociación formal sigue siendo al nodo más cercano, como exige R1.4. La distancia
 a una línea vial solo se utilizó como diagnóstico con librerías sobre UTM. No reemplaza

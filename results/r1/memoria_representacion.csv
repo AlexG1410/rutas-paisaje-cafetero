@@ -1,0 +1,7 @@
+red,representacion,supuesto_bytes,V,E,megabytes
+descargada,matriz,16 por celda (2 pesos de 8); modelo compacto sin objetos JVM,8877,20245,1260.818064
+descargada,listas,8 por cabecera + 20 por entrada (destino 4 + 2 pesos de 8); sin objetos JVM,8877,20245,0.475916
+componente_exportada,matriz,16 por celda (2 pesos de 8); modelo compacto sin objetos JVM,8791,20132,1236.506896
+componente_exportada,listas,8 por cabecera + 20 por entrada (destino 4 + 2 pesos de 8); sin objetos JVM,8791,20132,0.472968
+grafo_java,matriz,16 por celda (2 pesos de 8); modelo compacto sin objetos JVM,8791,19997,1236.506896
+grafo_java,listas,8 por cabecera + 20 por entrada (destino 4 + 2 pesos de 8); sin objetos JVM,8791,19997,0.470268

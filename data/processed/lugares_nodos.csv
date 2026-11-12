@@ -1,0 +1,41 @@
+id_lugar,idx_nodo,distancia_m,mas_de_500m,tratamiento
+cab_armenia,8465,56.046610999397885,false,Punto de salida y regreso por defecto.
+cab_buenavista,5825,17.470117141292224,false,Parque principal.
+cab_calarca,4014,43.956037543354576,false,"Parque principal Plaza de Bolívar, Carrera 24."
+cab_circasia,872,50.208520312256645,false,Parque principal.
+cab_cordoba,4627,45.990415510596755,false,Parque principal.
+cab_filandia,7035,41.19099930813446,false,Parque Bolívar.
+cab_genova,1392,25.49602106464013,false,"Plaza principal, frente a la Parroquia San José."
+cab_la_tebaida,6265,46.477383496032225,false,Plaza de Bolívar.
+cab_montenegro,671,41.468866633786845,false,"Parque principal, frente a la iglesia."
+cab_pijao,2322,22.326978277483544,false,"Plaza principal, Carrera 5."
+cab_quimbaya,4911,45.353355828700565,false,Plaza de Bolívar.
+cab_salento,83,57.04336999246256,false,"Plaza de Bolívar, Carrera 6."
+atr_parque_cafe,8463,192.70171746358918,false,"Km 6 vía La Tebaida–Montenegro, Pueblo Tapao."
+atr_panaca,7295,77.91560482311525,false,Km 7 vía a PANACA.
+atr_valle_cocora,935,925.4508214861103,true,Punto actualizado por el integrante al revisar llegada vehicular. La red descargada incluye la vía Salento - Valle de Cocora; la distancia a nodo no demuestra exclusión del último tramo. No se ha confirmado etiqueta track/service del acceso ni se modela conexión fuera del grafo.
+atr_jardin_botanico,4049,280.5154136465107,false,Km 3 vía al Valle del Cauca.
+atr_museo_oro_quimbaya,59,20.074964217747794,false,"Centro Cultural del Banco de la República, Cra. 14 #40 norte-80, Armenia."
+atr_recuca,6621,564.2993262565757,true,Conservar punto actual por decisión del integrante (2026-11-11); confirma que se puede llegar en vehículo aunque no puede inspeccionar el camino en Google Maps por su ubicación veredal. Se mantiene marcador general sin afirmar portería exacta. Vía Calle Larga incluida en la red; distancia a nodo no demuestra exclusión de carretera. Último acceso no modelado; sin verificación independiente del acceso.
+atr_arrieros,5620,399.0189636330882,false,"Km 3 vía Montenegro–Quimbaya, vereda Santana."
+atr_colina_iluminada,1660,143.79744018891145,false,Cra. 2 #7-54.
+atr_bejuco_canasto,7033,28.820549953625523,false,"Casa del Artesano, Cra. 5 con calle 6."
+atr_parque_vida,6944,78.24892361161939,false,Entrada por la Av. Bolívar.
+atr_parque_fundadores,447,41.66971564035472,false,Parque urbano de Armenia.
+atr_alto_cruz,1100,171.38666718958092,false,Acceso por la escalera desde la Calle Real.
+atr_calle_real,178,31.795606385311274,false,Calle peatonal entre la plaza y el mirador.
+atr_centro_guadua,7923,206.32271851854597,false,"Corozal, Córdoba. Ingreso con cita previa."
+atr_penas_blancas,5837,61.97467881112239,false,Punto de acceso elegido por el integrante en sustitución del alto de Peñas Blancas. La caminata se contempla en la duración de visita; no se añade al grafo vehicular. No se ha demostrado etiqueta de vía excluida.
+fh_combia,6708,707.762903045648,true,Punto actualizado al parqueadero de la hacienda según el integrante; sustituye el marcador general anterior. Acceso vehicular declarado por el grupo. Último acceso no modelado; etiqueta OSM de ese acceso no confirmada ni acceso verificado independientemente.
+fh_el_ocaso,2941,443.44365484464544,false,"Vereda Palestina, km 3,8."
+fh_las_acacias,1479,33.716449133707215,false,Vereda Palestina.
+fh_san_alberto,1091,274.48986255138095,false,"Terraza de visitantes de la hacienda, Cra. 2."
+fh_las_camelias,8260,469.852288367301,false,Portería del hotel.
+fh_mocawa_resort,8774,27.819238922950344,false,"Km 2,6 vía al Valle del Cauca."
+fh_mirador_palmas,7185,124.51335225061402,false,Km 6 vía a Cali.
+fh_decameron_panaca,4690,112.85465036680878,false,Km 7 vía a PANACA.
+ac_coocafeq_armenia,3719,45.933916472138904,false,"Punto de compra de café, Cra. 18 #51-26."
+ac_coocafeq_calarca,6526,37.579978853670816,false,"Punto de compra de café, Cra. 28 con calle 36."
+ac_coocafeq_filandia,1058,44.135818557211714,false,"Punto de compra de café, Cra. 6 #7-31, Edificio del Café."
+ac_coocafeq_pijao,2318,59.16042136956807,false,Calle 13 #5-13. Reemplaza la sede principal de Quimbaya por decisión del grupo. Nombre y dirección de compra respaldados por directorio público y listado MeCIC 2024 de la FNC localizado por búsqueda; no implica visita física ni certificación operativa actual.
+ac_central_el_agrado,7990,670.1509877874607,true,Conservar ubicación de la finca por decisión del integrante (2026-11-11); confirma acceso vehicular sin inconvenientes. Según su conocimiento allí se realizaba el proceso de beneficio; entrada exacta de recepción de café no confirmada. No se adopta la ficha alternativa por simple cercanía al grafo. Acceso declarado por el integrante sin verificación independiente ni certificación de operación actual. Último acceso no modelado.

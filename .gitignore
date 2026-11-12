@@ -1,0 +1,42 @@
+# Java / Gradle
+.gradle/
+build/
+out/
+bin/
+*.class
+!gradle/wrapper/gradle-wrapper.jar
+*.log
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.project
+.classpath
+
+# Python (python/)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Red cruda descargada de OSM (se regenera con python -m preparacion descargar).
+# Los datos PROCESADOS sí van al repositorio (data/processed), comprimidos.
+data/raw/*
+!data/raw/.gitkeep
+python/cache/
+cache/
+
+# Guías del docente: material del curso, solo en local (ver docs/guias/README.md)
+docs/guias/*
+!docs/guias/README.md
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Configuración local de las IAs (la compartida sí se versiona)
+.claude/settings.local.json
+/personal/

@@ -1,0 +1,15 @@
+{
+  "fecha_descarga": "2026-11-11T01:56:43+00:00",
+  "consulta": "Quindío, Colombia",
+  "network_type": "drive",
+  "retain_all": true,
+  "simplify": true,
+  "osmnx": "2.1.1",
+  "networkx": "3.7",
+  "nodos_descargada": 8877,
+  "aristas_descargada": 20245,
+  "uso_cache_http": true,
+  "nodos_componente": 8791,
+  "aristas_componente": 20132,
+  "porcentaje_velocidad_osm": 6.472282932644546
+}

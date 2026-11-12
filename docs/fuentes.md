@@ -1,0 +1,93 @@
+# Fuentes candidatas
+
+**Ninguna se cita sin verificarla antes** (autor, año, título y, si aplica, capítulo o
+sección). Al verificarla, marcar `[x]` y anotar exactamente qué se usó.
+
+## Libros y artículos
+- [ ] Cormen, T. H., Leiserson, C. E., Rivest, R. L. y Stein, C. (2022). *Introduction to
+      algorithms* (4.ª ed.). MIT Press. — Dijkstra, montículos binarios, caminos mínimos,
+      envolvente convexa, Teorema Maestro. (Verificar números de capítulo en la edición usada.)
+- [ ] Dijkstra, E. W. (1959). A note on two problems in connexion with graphs. *Numerische
+      Mathematik, 1*, 269–271. — R2.
+- [ ] Tarjan, R. E. (1972). Depth-first search and linear graph algorithms. *SIAM Journal on
+      Computing, 1*(2), 146–160. — R1.3 (componentes fuertemente conexas).
+- [ ] Nuutila, E. y Soisalon-Soininen, E. (1994). On finding the strongly connected
+      components in a directed graph. *Information Processing Letters, 49*(1), 9–14. — R1.3
+      (variante que cita NetworkX; confirmar en su documentación).
+- [ ] Held, M. y Karp, R. M. (1962). A dynamic programming approach to sequencing problems.
+      *Journal of the SIAM, 10*(1), 196–210. — R4.1.
+- [ ] Barber, C. B., Dobkin, D. P. y Huhdanpaa, H. (1996). The Quickhull algorithm for convex
+      hulls. *ACM Transactions on Mathematical Software, 22*(4), 469–483. — R3 (Qhull/SciPy).
+- [ ] Preparata, F. P. y Hong, S. J. (1977). Convex hulls of finite sets of points in two and
+      three dimensions. *Communications of the ACM, 20*(2), 87–93. — R3 (alternativa por mezcla).
+- [ ] Boeing, G. (2017). OSMnx: New methods for acquiring, constructing, analyzing, and
+      visualizing complex street networks. *Computers, Environment and Urban Systems, 65*,
+      126–139. — R1.
+- [ ] Guías del curso 02–09 (docente de Análisis de Algoritmos, U. del Quindío, 2026-2).
+
+## Documentación técnica (citar con enlace y versión)
+- [x] Oracle (2023). *The Java Language Specification, Java SE 21 Edition*, §4.2,
+      §4.2.1 y §4.2.3. https://docs.oracle.com/javase/specs/jls/se21/html/jls-4.html
+      Consultada el 2026-11-11: `int` de 32 bits y `double` de formato binary64 de 64 bits;
+      §4.2.2 advierte que las operaciones enteras no notifican desbordamiento. Usada en
+      R1.1 para motivar 4 y 8 bytes del modelo compacto y evitar productos `int` para V².
+      No se atribuye a esta fuente el tamaño de referencias, objetos ni cabeceras JVM;
+      8 bytes por cabecera es un supuesto explícito de comparación, no una medición.
+- [x] Oracle. Documentación de Java SE 21, `java.lang.Math.hypot(double, double)`.
+      https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Math.html#hypot(double,double)
+      Consultada el 2026-11-10: devuelve `sqrt(x² + y²)` sin desbordamiento o
+      subdesbordamiento intermedio. Usada para la operación numérica de R1.4; la
+      complejidad de la búsqueda lineal se deriva por conteo propio en el documento,
+      no se atribuye al Javadoc.
+- [ ] OSMnx 2.x: `truncate.largest_component`, `routing.add_edge_speeds`,
+      `distance.nearest_nodes`, `graph_from_place`, `graph_from_point`.
+- [x] OSMnx 2.1.1. *User Reference*, `graph.graph_from_place`,
+      `io.save_graphml` e `io.load_graphml`.
+      https://osmnx.readthedocs.io/en/stable/user-reference.html#osmnx.graph.graph_from_place
+      Consultada el 2026-11-10, junto con las firmas y el código instalado de guardado y
+      lectura: `retain_all=False` conserva solo la componente débil más grande;
+      `simplify=True` simplifica la topología; GraphML conserva atributos serializados
+      y `load_graphml` restaura tipos conocidos. Verificación para la descarga, no para
+      atribuir complejidades de SCC ni validar la política de velocidades pendiente.
+- [x] NetworkX 3.7. `strongly_connected_components`, documentación y código instalado.
+      https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.components.strongly_connected_components.html
+      Consultada el 2026-11-10: Tarjan iterativo con mejoras de Tarjan y Zwick (2024) y una
+      técnica de WebGraph. La documentación NO declara una cota explícita; el documento
+      deriva O(V+E) por inspección del recorrido y distingue memoria auxiliar de la copia.
+      La referencia a Nuutila no describe la versión instalada 3.7.
+- [x] OSMnx 2.1.1. `truncate.largest_component`, documentación y código instalado.
+      https://osmnx.readthedocs.io/en/stable/user-reference.html#osmnx.truncate.largest_component
+      Consultada el 2026-11-10: `strongly=True`, comprobación previa, selección con
+      `max(..., key=len)` y copia del subgrafo inducido si no era ya conexo.
+- [x] OSMnx 2.1.1. *User Reference*, `routing.add_edge_speeds`.
+      https://osmnx.readthedocs.io/en/stable/user-reference.html#osmnx.routing.add_edge_speeds
+      Consultada el 2026-11-10 junto con el código instalado de la función: imputación por
+      tipo de vía, conversión mph y posibilidad de elegir agregación. El código confirma
+      que el respaldo sin `fallback` es el promedio entre promedios de tipos con datos y
+      que `highway` en lista se clasifica por su primer elemento. La selección por mínimo
+      de límites múltiples es un supuesto propio documentado, no el valor predeterminado.
+- [ ] Java 21 (Javadoc oficial): `java.util.PriorityQueue` (costo de `offer`/`poll`),
+      `List.sort` / `Collections.sort` (TimSort), `Arrays.sort` para primitivos, `ArrayList`,
+      `HashMap`.
+- [ ] SciPy: `scipy.spatial.ConvexHull` (usa Qhull, escrito en C).
+- [ ] Spring Boot 4.1 y ArchUnit (solo si se describen en la arquitectura).
+
+## Datos del catálogo
+- [x] OSMnx 2.1.1, código de `_get_network_filter` en `_overpass.py`.
+      https://raw.githubusercontent.com/gboeing/osmnx/v2.1.1/osmnx/_overpass.py
+      Consultado junto con el código instalado el 2026-11-10: el filtro `drive` excluye
+      `highway=track`, `highway=service` y otras restricciones. Usado para describir el
+      filtro general, no para atribuir etiquetas no observadas a un acceso particular.
+- [ ] Listado FNC de compradores MeCIC 2024, localizado por búsqueda: entrada de Coocafeq
+      Pijao, calle 13 #5-13, coincidente con la ficha aportada por el grupo.
+      https://federaciondecafeteros.org/wp-content/uploads/2026/02/92-Publicacio%CC%81n-compradores-autorizados-MECIC-01082024.pdf
+      El extracto indexado confirma nombre/dirección; lectura íntegra del PDF pendiente.
+      No certifica coordenadas de portería ni operación actual.
+- [x] Directorio Yoys, ficha «Cooperativa de Caficultores del Quindío - Compra de Café Pijao».
+      https://www.yoys.net/phone-57-67544559-agricultural-association-Pijao-COEN135803.html
+      Ficha localizada el 2026-11-10 mediante búsqueda, cuyo extracto muestra nombre de
+      compra y dirección calle 13 #5-13. Evidencia secundaria de identidad/dirección;
+      el grupo aporta la comprobación del punto en mapa, no esta ficha.
+- [ ] Fuente de coordenadas (p. ej. OpenStreetMap/mapa consultado) y fecha.
+- [ ] Fuente o criterio de la duración de cada atractivo.
+- [ ] Fuente de la tabla de velocidades por tipo de vía, si se usa (R1.2).

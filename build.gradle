@@ -1,0 +1,54 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '4.1.1'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'co.edu.uniquindio'
+version = '0.1.0'
+description = 'Proyecto final de Análisis de Algoritmos (U. del Quindío, 2026-2)'
+
+java {
+    toolchain {
+        // Todos los integrantes miden con la misma versión (protocolo 6.1).
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Capa de presentación: REST + página estática (Leaflet). Jackson 3 viene incluido.
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+
+    // Pruebas: JUnit 5 + AssertJ (starter) y ArchUnit para las reglas de capas e
+    // implementación propia. Ninguna librería de grafos o geometría: la verificación contra
+    // NetworkX/SciPy/OSMnx se hace en python/ (ver AGENTS.md).
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.tngtech.archunit:archunit-junit5:1.4.2'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.compilerArgs << '-parameters'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    // Las pruebas de Medidor lanzan una JVM hija con el mismo classpath.
+    testLogging {
+        events 'failed'
+        exceptionFormat 'full'
+    }
+}
+
+// Los comandos de experimentos se ejecutan desde la raíz del repositorio:
+//   ./gradlew bootRun --args='r2'
+// Memoria fija para que todas las mediciones usen el mismo montículo de la JVM.
+tasks.named('bootRun') {
+    workingDir = rootDir
+    jvmArgs = ['-Xms2g', '-Xmx2g', '-Xss16m']
+}

@@ -63,6 +63,27 @@ La instalación de dependencias también requiere internet.
 
 ### Pruebas de infraestructura y pruebas de algoritmos
 
+**Actualización 2026-11-12 (bloque R2):** ambos Dijkstra, reconstrucción, experimento y
+matriz implementados. Suite Python: 142/142. Suite Java completa: 84 pruebas, 70
+aprobadas y 14 fallos por R3/R4 aún pendientes; ArchUnit y R1/R2 pasan. Las cifras
+históricas siguientes describen etapas anteriores, no el estado actual.
+
+Reproducir R2 desde la raíz (requiere los datos procesados y asociaciones de R1):
+
+```powershell
+.\gradlew.bat bootRun --args=maquina --console=plain
+.\gradlew.bat bootRun --args=r2 --console=plain
+cd python
+.\.venv\Scripts\python.exe -m preparacion verificar-dijkstra
+.\.venv\Scripts\python.exe -m preparacion graficas
+cd ..
+```
+
+Evidencia: `results/r2/`, `results/figuras/r2_tiempo_vs_explorados.png` y análisis en
+`docs/documento-tecnico/03-r2-caminos-minimos.md`. La matriz Java contiene 40×40 tiempos
+en segundos a tres decimales. NetworkX verifica, no genera esa matriz. No ejecutar
+pruebas ni tareas pesadas simultáneamente con las mediciones.
+
 Los algoritmos pendientes lanzan `UnsupportedOperationException`: sus pruebas deben seguir
 visibles y fallarán hasta implementarlos. Eso no equivale a un fallo de instalación.
 Para comprobar por separado la infraestructura Java, desde la raíz:

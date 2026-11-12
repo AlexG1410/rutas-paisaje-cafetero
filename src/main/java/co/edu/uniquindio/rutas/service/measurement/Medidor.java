@@ -91,29 +91,44 @@ public final class Medidor {
     public static <E extends Serializable, R extends Serializable> Medicion medirConLimite(
             Class<? extends Tarea<E, R>> tarea, E entrada, int repeticiones, int calentamientos,
             double umbralUnaS, double limiteS) {
+        if (tarea == null || repeticiones <= 0 || calentamientos < 0
+                || !Double.isFinite(umbralUnaS) || umbralUnaS <= 0
+                || !Double.isFinite(limiteS) || limiteS <= 0) {
+            throw new IllegalArgumentException("Parámetros de medición inválidos");
+        }
         Process proceso = lanzarHija(tarea, repeticiones, calentamientos, umbralUnaS);
         BlockingQueue<Object> buzon = new LinkedBlockingQueue<>();
         Thread lector = new Thread(() -> leerMensajes(proceso, buzon), "lector-medicion");
         lector.setDaemon(true);
         lector.start();
         List<Double> tiempos = new ArrayList<>();
-        try (ObjectOutputStream salida = new ObjectOutputStream(proceso.getOutputStream())) {
-            salida.writeObject(entrada);
-        } catch (IOException e) {
-            proceso.destroyForcibly();
-            throw new UncheckedIOException("No se pudo enviar la entrada a la JVM hija", e);
-        }
         try {
+            try (ObjectOutputStream salida = new ObjectOutputStream(proceso.getOutputStream())) {
+                salida.writeObject(entrada);
+            }
+            boolean ejecutando = false;
             while (true) {
-                Object recibido = buzon.poll((long) (limiteS * 1000), TimeUnit.MILLISECONDS);
+                double esperaS = ejecutando ? limiteS : 60;
+                Object recibido = buzon.poll(Math.max(1L, (long) (esperaS * 1000)),
+                        TimeUnit.MILLISECONDS);
                 if (recibido == null) {
-                    return Medicion.noCompletada(tiempos);
+                    if (ejecutando) {
+                        return Medicion.noCompletada(tiempos);
+                    }
+                    throw new IllegalStateException("La JVM hija no respondió durante preparación o transferencia");
                 }
                 if (recibido instanceof Exception error) {
                     throw new IllegalStateException("La JVM hija terminó sin responder", error);
                 }
                 Mensaje m = (Mensaje) recibido;
+                if (m.tipo() == Mensaje.Tipo.CALENTAMIENTO || m.tipo() == Mensaje.Tipo.REPETICION) {
+                    ejecutando = false;
+                    if (m.ms() > limiteS * 1000) {
+                        return Medicion.noCompletada(tiempos);
+                    }
+                }
                 switch (m.tipo()) {
+                    case INICIO -> ejecutando = true;
                     case CALENTAMIENTO -> { /* no se cuenta */ }
                     case REPETICION -> {
                         if (m.ms() > umbralUnaS * 1000.0) {
@@ -130,12 +145,19 @@ public final class Medidor {
                     default -> throw new IllegalStateException("Mensaje desconocido");
                 }
             }
+        } catch (IOException e) {
+            throw new UncheckedIOException("No se pudo enviar la entrada a la JVM hija", e);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             return Medicion.noCompletada(tiempos);
         } finally {
             if (proceso.isAlive()) {
                 proceso.destroyForcibly();
+            }
+            try {
+                proceso.waitFor();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
             }
         }
     }
@@ -144,7 +166,7 @@ public final class Medidor {
                                       double umbralUnaS) {
         String java = Path.of(System.getProperty("java.home"), "bin", "java").toString();
         long xmxMb = Runtime.getRuntime().maxMemory() / (1024 * 1024);
-        List<String> comando = List.of(java, "-Xmx" + xmxMb + "m", "-Xss16m",
+        List<String> comando = List.of(java, "-Xms" + xmxMb + "m", "-Xmx" + xmxMb + "m", "-Xss16m",
                 "-cp", classpath(tarea), ProcesoAislado.class.getName(), tarea.getName(),
                 String.valueOf(repeticiones), String.valueOf(calentamientos),
                 String.valueOf(umbralUnaS));
@@ -194,6 +216,11 @@ public final class Medidor {
 
     static <T> Ejecucion<T> ejecutar(Supplier<T> algoritmo) {
         System.gc();
+        return cronometrar(algoritmo);
+    }
+
+    /** Tramo único de reloj; preparación, GC y mensajes siempre antes de llamarlo. */
+    static <T> Ejecucion<T> cronometrar(Supplier<T> algoritmo) {
         long inicio = System.nanoTime();
         T resultado = algoritmo.get();
         long fin = System.nanoTime();

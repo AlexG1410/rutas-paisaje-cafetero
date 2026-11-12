@@ -13,7 +13,9 @@ import java.util.Map;
  *
  * <p>Memoria: O(V + E). Recorrer los vecinos de u cuesta O(grado de salida de u).
  */
-public final class Grafo {
+public final class Grafo implements java.io.Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final int n;
     private final Arista[][] adyacencia;
@@ -47,9 +49,19 @@ public final class Grafo {
     public static Grafo desdeArreglos(int n, int[] u, int[] v, double[] tiempoS,
                                       double[] distanciaM, long[] osmid, double[] x,
                                       double[] y, double[] lat, double[] lon) {
+        if (n < 0 || u == null || v == null || tiempoS == null || distanciaM == null) {
+            throw new IllegalArgumentException("Tamaño negativo o arreglos de aristas nulos");
+        }
         if (u.length != v.length || u.length != tiempoS.length || u.length != distanciaM.length) {
             throw new IllegalArgumentException("Los arreglos de aristas deben tener el mismo tamaño");
         }
+        if (osmid != null && osmid.length != n) {
+            throw new IllegalArgumentException("Los identificadores deben tener tamaño n");
+        }
+        validarCoordenadas(x, n);
+        validarCoordenadas(y, n);
+        validarCoordenadas(lat, n);
+        validarCoordenadas(lon, n);
         Map<Long, Integer> mejor = new HashMap<>();
         List<Integer> elegidas = new ArrayList<>();
         for (int i = 0; i < u.length; i++) {
@@ -57,9 +69,10 @@ public final class Grafo {
                 throw new IllegalArgumentException(
                         "Arista (" + u[i] + ", " + v[i] + ") fuera de rango 0.." + (n - 1));
             }
-            if (tiempoS[i] < 0 || distanciaM[i] < 0) {
+            if (!Double.isFinite(tiempoS[i]) || !Double.isFinite(distanciaM[i])
+                    || tiempoS[i] < 0 || distanciaM[i] < 0) {
                 throw new IllegalArgumentException(
-                        "Peso negativo en (" + u[i] + ", " + v[i] + "): Dijkstra exige pesos >= 0");
+                        "Peso no finito o negativo en (" + u[i] + ", " + v[i] + ")");
             }
             long clave = (long) u[i] * n + v[i];
             Integer previa = mejor.get(clave);
@@ -119,6 +132,20 @@ public final class Grafo {
 
     private static double[] copiaOVacio(double[] arreglo, int n) {
         return arreglo != null ? arreglo.clone() : new double[0];
+    }
+
+    private static void validarCoordenadas(double[] arreglo, int n) {
+        if (arreglo == null) {
+            return;
+        }
+        if (arreglo.length != n) {
+            throw new IllegalArgumentException("Las coordenadas deben tener tamaño n");
+        }
+        for (double valor : arreglo) {
+            if (!Double.isFinite(valor)) {
+                throw new IllegalArgumentException("Coordenada no finita");
+            }
+        }
     }
 
     public int n() {

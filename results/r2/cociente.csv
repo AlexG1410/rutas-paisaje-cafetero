@@ -1,0 +1,14 @@
+origen,destino,cociente,estado
+cab_pijao,ac_coocafeq_pijao,2.052434456928839,completada
+fh_san_alberto,cab_buenavista,4.780487804878049,completada
+fh_mirador_palmas,fh_mocawa_resort,3.828516902944384,completada
+atr_parque_cafe,ac_central_el_agrado,3.211901306240929,completada
+cab_calarca,atr_recuca,55.28808654309928,completada
+atr_parque_vida,cab_armenia,11.111072704228597,completada
+fh_mirador_palmas,cab_la_tebaida,7.627304744147504,completada
+ac_coocafeq_calarca,fh_combia,20.784876752306005,completada
+ac_coocafeq_armenia,atr_parque_vida,23.183737188624175,completada
+atr_parque_fundadores,atr_museo_oro_quimbaya,25.827693080918078,completada
+mediana,,9.369188724188051,completada
+minimo,,2.052434456928839,completada
+maximo,,55.28808654309928,completada

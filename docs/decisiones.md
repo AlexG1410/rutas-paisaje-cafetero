@@ -42,7 +42,10 @@ también la tabla de la sección 10 de `AGENTS.md`.
 ## D5. Arnés de medición común — tomada
 - `Medidor`: `System.nanoTime`, ms, `System.gc()` antes de cada ejecución, 1 calentamiento
   (JIT) + mediana de 5, una sola medición si pasa de 60 s, JVM hija con límite de 300 s para
-  la fuerza bruta. Python usa la misma política. Mediciones con `bootRun` y `-Xmx2g`.
+   cada serie experimental que requiera corte. Python usa la misma política. Mediciones
+   Java con `bootRun`, `-Xms2g -Xmx2g -Xss16m` y `optimizedLaunch=false` para no limitar
+   el JIT por una optimización de arranque. El hijo avisa INICIO después de preparar/GC;
+   límite por ejecución y espera de infraestructura separada, no por serie completa.
 
 ## D6. Envolvente: QuickHull — propuesta
 - Puntos de la red mayoritariamente interiores (cascos urbanos y vías). Alternativa: por
@@ -93,3 +96,14 @@ también la tabla de la sección 10 de `AGENTS.md`.
   El medidor aislado aplica límite por ejecución, incluido calentamiento.
 - Las zonas pueden diferir en densidad, proporción conexa y atributos; la gráfica no
   constituye por sí sola una prueba de complejidad ni una comparación de algoritmos propios.
+
+## D13. Pares y tramo medido de R2 — tomada (2026-11-12)
+- Aprobados diez pares del mismo municipio y diez intermunicipales, dirigidos y sin
+  compartir nodo origen/destino en un mismo par. Se ordena catálogo por ID y se barajan
+  ambos grupos con una instancia Random(SEMILLA); los pares elegidos se guardan en CSV.
+- La lineal se mide solo en los diez intramunicipales; la cola en los veinte. Ambas
+  incluyen reconstrucción de ruta, pero no preparación, lectura, impresión ni transporte.
+- Mismo municipio es el criterio geográfico, no promesa de menor recorrido ni menor
+  cantidad de nodos explorados. No reemplazar consultas por resultar lentas.
+- Matriz conserva tres decimales en segundos (contrato existente), verificación externa
+  con tolerancia de redondeo distinta de las comparaciones de resultados double.

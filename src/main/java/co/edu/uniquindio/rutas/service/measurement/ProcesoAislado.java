@@ -33,8 +33,10 @@ public final class ProcesoAislado {
             Serializable resultado = null;
             boolean unaSola = false;
             for (int i = 0; i < calentamientos && !unaSola; i++) {
+                System.gc();
+                enviar(out, new Mensaje(Mensaje.Tipo.INICIO, 0, null, null));
                 Medidor.Ejecucion<Serializable> e =
-                        Medidor.ejecutar(() -> tarea.ejecutar(entrada));
+                        Medidor.cronometrar(() -> tarea.ejecutar(entrada));
                 resultado = e.resultado();
                 if (e.ms() > umbralMs) {
                     enviar(out, new Mensaje(Mensaje.Tipo.REPETICION, e.ms(), null, null));
@@ -44,8 +46,10 @@ public final class ProcesoAislado {
                 }
             }
             for (int i = 0; i < repeticiones && !unaSola; i++) {
+                System.gc();
+                enviar(out, new Mensaje(Mensaje.Tipo.INICIO, 0, null, null));
                 Medidor.Ejecucion<Serializable> e =
-                        Medidor.ejecutar(() -> tarea.ejecutar(entrada));
+                        Medidor.cronometrar(() -> tarea.ejecutar(entrada));
                 resultado = e.resultado();
                 enviar(out, new Mensaje(Mensaje.Tipo.REPETICION, e.ms(), null, null));
                 if (e.ms() > umbralMs) {

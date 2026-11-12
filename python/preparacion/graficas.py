@@ -26,7 +26,19 @@ from preparacion.config import FIGURAS, RESULTS
 
 
 def ejecutar() -> None:
-    """Genera la figura R1 disponible; R2–R4 se integrarán con sus experimentos."""
+    """Genera figuras de R1/R2 disponibles; no exige resultados de bloques futuros."""
+    disponibles = False
+    for archivo, generar in (("r1/tiempo_componente.csv", graficar_componente),
+                             ("r2/mediciones_dijkstra.csv", graficar_dijkstra)):
+        if (RESULTS / archivo).exists():
+            generar()
+            disponibles = True
+    if not disponibles:
+        raise FileNotFoundError("No hay CSV experimentales de R1/R2 para graficar")
+
+
+def graficar_componente() -> None:
+    """Figura R1 con tiempos completados y marcas separadas para timeout."""
     archivo = RESULTS / "r1" / "tiempo_componente.csv"
     if not archivo.exists():
         raise FileNotFoundError(f"No existe el resultado experimental: {archivo}")
@@ -77,5 +89,45 @@ def ejecutar() -> None:
         eje.legend()
         figura.tight_layout()
         figura.savefig(FIGURAS / "r1_tiempo_componente.png", dpi=150)
+    finally:
+        plt.close(figura)
+
+
+def graficar_dijkstra() -> None:
+    """R2: nodos fijados frente a tiempo; dos versiones y timeouts sin cifras ficticias."""
+    archivo = RESULTS / "r2/mediciones_dijkstra.csv"
+    tabla = pd.read_csv(archivo)
+    requeridas = {"origen", "destino", "version", "nodos_explorados", "tiempo_ms", "estado"}
+    if tabla.empty or not requeridas.issubset(tabla.columns):
+        raise ValueError(f"Tabla vacía o columnas faltantes en {archivo}")
+    if (not tabla.version.isin(["lineal", "cola_prioridad"]).all()
+            or not tabla.estado.isin(["completada", "no completada"]).all()):
+        raise ValueError(f"Versión o estado desconocido en {archivo}")
+    completadas = tabla.loc[tabla.estado == "completada"]
+    no_completadas = tabla.loc[tabla.estado == "no completada"]
+    for fila in completadas.itertuples(index=False):
+        if (not math.isfinite(float(fila.tiempo_ms)) or fila.tiempo_ms < 0
+                or not math.isfinite(float(fila.nodos_explorados))
+                or fila.nodos_explorados < 1 or fila.nodos_explorados != int(fila.nodos_explorados)):
+            raise ValueError(f"Tiempo o nodos explorados inválidos en {archivo}")
+    if no_completadas[["tiempo_ms", "nodos_explorados"]].notna().any().any():
+        raise ValueError("Las mediciones no completadas no deben contener cifras de rendimiento")
+    FIGURAS.mkdir(parents=True, exist_ok=True)
+    figura, eje = plt.subplots(figsize=(8, 5))
+    try:
+        for version, etiqueta, marca in (("lineal", "Lineal", "o"),
+                                         ("cola_prioridad", "Cola de prioridad", "x")):
+            filas = completadas.loc[completadas.version == version]
+            eje.scatter(filas.nodos_explorados, filas.tiempo_ms, label=etiqueta, marker=marca)
+        if not no_completadas.empty:
+            eje.text(0.02, 0.97, f"{len(no_completadas)} no completadas (sin tiempo/nodos)",
+                     transform=eje.transAxes, va="top", color="red")
+        eje.set_title("Dijkstra: nodos explorados y tiempo de ejecución")
+        eje.set_xlabel("Nodos fijados (cantidad)")
+        eje.set_ylabel("Tiempo (ms)")
+        eje.grid(True, alpha=0.3)
+        eje.legend()
+        figura.tight_layout()
+        figura.savefig(FIGURAS / "r2_tiempo_vs_explorados.png", dpi=150)
     finally:
         plt.close(figura)

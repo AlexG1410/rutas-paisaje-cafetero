@@ -1,0 +1,21 @@
+origen,destino,nodo_origen,nodo_destino,municipio_origen,municipio_destino,criterio,medir_lineal,semilla
+cab_pijao,ac_coocafeq_pijao,2322,2318,Pijao,Pijao,mismo_municipio,true,2026
+fh_san_alberto,cab_buenavista,1091,5825,Buenavista,Buenavista,mismo_municipio,true,2026
+fh_mirador_palmas,fh_mocawa_resort,7185,8774,La Tebaida,La Tebaida,mismo_municipio,true,2026
+atr_parque_cafe,ac_central_el_agrado,8463,7990,Montenegro,Montenegro,mismo_municipio,true,2026
+cab_calarca,atr_recuca,4014,6621,Calarcá,Calarcá,mismo_municipio,true,2026
+atr_parque_vida,cab_armenia,6944,8465,Armenia,Armenia,mismo_municipio,true,2026
+fh_mirador_palmas,cab_la_tebaida,7185,6265,La Tebaida,La Tebaida,mismo_municipio,true,2026
+ac_coocafeq_calarca,fh_combia,6526,6708,Calarcá,Calarcá,mismo_municipio,true,2026
+ac_coocafeq_armenia,atr_parque_vida,3719,6944,Armenia,Armenia,mismo_municipio,true,2026
+atr_parque_fundadores,atr_museo_oro_quimbaya,447,59,Armenia,Armenia,mismo_municipio,true,2026
+cab_calarca,atr_alto_cruz,4014,1100,Calarcá,Salento,intermunicipal,false,2026
+cab_cordoba,atr_bejuco_canasto,4627,7033,Córdoba,Filandia,intermunicipal,false,2026
+atr_arrieros,cab_circasia,5620,872,Quimbaya,Circasia,intermunicipal,false,2026
+fh_mocawa_resort,atr_centro_guadua,8774,7923,La Tebaida,Córdoba,intermunicipal,false,2026
+cab_genova,atr_calle_real,1392,178,Génova,Salento,intermunicipal,false,2026
+atr_colina_iluminada,cab_buenavista,1660,5825,Filandia,Buenavista,intermunicipal,false,2026
+atr_arrieros,fh_las_camelias,5620,8260,Quimbaya,Montenegro,intermunicipal,false,2026
+atr_penas_blancas,fh_las_acacias,5837,1479,Calarcá,Salento,intermunicipal,false,2026
+atr_parque_fundadores,atr_parque_cafe,447,8463,Armenia,Montenegro,intermunicipal,false,2026
+cab_filandia,ac_coocafeq_pijao,7035,2318,Filandia,Pijao,intermunicipal,false,2026

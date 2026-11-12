@@ -62,3 +62,45 @@ def test_t1fc_datos_invalidos_no_generan(entorno, contenido):
     with pytest.raises(ValueError):
         graficas.ejecutar()
     assert not destino.exists()
+
+
+def test_t2fa_figura_dijkstra_dos_versiones_y_timeout(entorno, monkeypatch):
+    origen_r1, _ = entorno
+    carpeta = origen_r1.parent.parent / "r2"
+    carpeta.mkdir()
+    origen = carpeta / "mediciones_dijkstra.csv"
+    pd.DataFrame({"origen": ["a", "a", "b"], "destino": ["b", "b", "c"],
+                  "version": ["lineal", "cola_prioridad", "lineal"],
+                  "nodos_explorados": [30, 30, None], "tiempo_ms": [4, 1, None],
+                  "estado": ["completada", "completada", "no completada"]}).to_csv(origen, index=False)
+    contenido = origen.read_bytes()
+    from matplotlib.axes import Axes
+    original = Axes.text
+    textos = []
+
+    def registrar(self, x, y, texto, *args, **kwargs):
+        textos.append(texto)
+        return original(self, x, y, texto, *args, **kwargs)
+
+    monkeypatch.setattr(Axes, "text", registrar)
+    graficas.ejecutar()
+    assert (graficas.FIGURAS / "r2_tiempo_vs_explorados.png").read_bytes().startswith(b"\x89PNG")
+    assert origen.read_bytes() == contenido
+    assert any("no completada" in texto for texto in textos)
+    assert not plt.get_fignums()
+
+
+@pytest.mark.parametrize("columna,valor", [("tiempo_ms", float("nan")),
+                                         ("nodos_explorados", 0.5),
+                                         ("version", "otra"), ("estado", "otra")])
+def test_t2fa_figura_rechaza_datos_invalidos(entorno, columna, valor):
+    origen_r1, _ = entorno
+    carpeta = origen_r1.parent.parent / "r2"
+    carpeta.mkdir()
+    fila = {"origen": "a", "destino": "b", "version": "lineal",
+            "nodos_explorados": 30, "tiempo_ms": 4, "estado": "completada"}
+    fila[columna] = valor
+    pd.DataFrame([fila]).to_csv(carpeta / "mediciones_dijkstra.csv", index=False)
+    with pytest.raises(ValueError):
+        graficas.ejecutar()
+    assert not (graficas.FIGURAS / "r2_tiempo_vs_explorados.png").exists()

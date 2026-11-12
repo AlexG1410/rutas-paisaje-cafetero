@@ -15,5 +15,5 @@ import java.io.Serializable;
 record Mensaje(Tipo tipo, double ms, Serializable resultado, String detalle)
         implements Serializable {
 
-    enum Tipo { CALENTAMIENTO, REPETICION, FIN, ERROR }
+    enum Tipo { INICIO, CALENTAMIENTO, REPETICION, FIN, ERROR }
 }

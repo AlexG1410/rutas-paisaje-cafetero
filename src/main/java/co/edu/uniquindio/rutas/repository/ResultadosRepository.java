@@ -22,6 +22,14 @@ public class ResultadosRepository {
     public static final List<String> COLUMNAS_LUGARES_LEJANOS = LugaresNodosRepository.COLUMNAS;
     public static final List<String> COLUMNAS_MEMORIA_REPRESENTACION =
             List.of("red", "representacion", "supuesto_bytes", "V", "E", "megabytes");
+    public static final List<String> COLUMNAS_PARES_R2 = List.of("origen", "destino",
+            "nodo_origen", "nodo_destino", "municipio_origen", "municipio_destino",
+            "criterio", "medir_lineal", "semilla");
+    public static final List<String> COLUMNAS_VERIFICACION_R2 = List.of("origen", "destino",
+            "tiempo_lineal_s", "tiempo_cola_s", "coinciden");
+    public static final List<String> COLUMNAS_MEDICIONES_R2 = List.of("origen", "destino", "version",
+            "tiempo_viaje_s", "nodos_explorados", "tiempo_ms", "repeticiones", "estado", "ruta_nodos");
+    public static final List<String> COLUMNAS_COCIENTE_R2 = List.of("origen", "destino", "cociente", "estado");
 
     /** R1.4: admite cero lejanos y conserva la cabecera. */
     public Path guardarLugaresLejanos(List<FilaLugarNodo> filas) {

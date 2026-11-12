@@ -8,6 +8,37 @@ import org.junit.jupiter.api.Test;
 
 class GrafoTest {
 
+    @Test void t1ga_rechazaPesosNoFinitos() {
+        for (double peso : new double[] {Double.NaN, Double.POSITIVE_INFINITY,
+                Double.NEGATIVE_INFINITY, -1}) {
+            assertThrows(IllegalArgumentException.class,
+                    () -> Grafo.dirigido(2, new double[][] {{0, 1, peso}}));
+            assertThrows(IllegalArgumentException.class,
+                    () -> Grafo.dirigido(2, new double[][] {{0, 1, 1, peso}}));
+        }
+    }
+
+    @Test void t1gb_rechazaArreglosInvalidos() {
+        assertThrows(IllegalArgumentException.class, () -> Grafo.desdeArreglos(-1,
+                new int[0], new int[0], new double[0], new double[0], null, null, null, null, null));
+        assertThrows(IllegalArgumentException.class, () -> Grafo.desdeArreglos(1,
+                null, new int[0], new double[0], new double[0], null, null, null, null, null));
+        assertThrows(IllegalArgumentException.class, () -> Grafo.desdeArreglos(1,
+                new int[0], new int[0], new double[0], new double[0], new long[2], null, null, null, null));
+        assertThrows(IllegalArgumentException.class, () -> Grafo.desdeArreglos(1,
+                new int[0], new int[0], new double[0], new double[0], null, new double[2], null, null, null));
+        for (double invalido : new double[] {Double.NaN, Double.POSITIVE_INFINITY}) {
+            assertThrows(IllegalArgumentException.class, () -> Grafo.desdeArreglos(1,
+                    new int[0], new int[0], new double[0], new double[0], null, null,
+                    new double[] {invalido}, null, null));
+        }
+    }
+
+    @Test void t1gc_admiteCeroYGrafoVacio() {
+        assertEquals(0, Grafo.dirigido(0, new double[0][]).n());
+        assertEquals(0, Grafo.dirigido(2, new double[][] {{0, 1, 0}}).vecinos(0)[0].tiempoS());
+    }
+
     @Test
     void aristasParalelasConservanLaDeMenorTiempo() {
         Grafo g = Grafo.dirigido(2, new double[][] {

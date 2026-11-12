@@ -12,5 +12,5 @@ package co.edu.uniquindio.rutas.model;
  * @param distancias      arreglo dist[0..V-1] al terminar (lo usa la matriz de tiempos)
  */
 public record ResultadoDijkstra(double tiempoS, int[] ruta, int nodosExplorados,
-                                double[] distancias) {
+                                double[] distancias) implements java.io.Serializable {
 }

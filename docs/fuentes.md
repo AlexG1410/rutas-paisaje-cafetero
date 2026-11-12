@@ -26,6 +26,31 @@ sección). Al verificarla, marcar `[x]` y anotar exactamente qué se usó.
 - [ ] Guías del curso 02–09 (docente de Análisis de Algoritmos, U. del Quindío, 2026-2).
 
 ## Documentación técnica (citar con enlace y versión)
+- [x] Oracle. *Java SE 21 API*, `java.util.ArrayList`.
+      https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/ArrayList.html
+      Consultada el 2026-11-12: get/size O(1), add al final O(1) amortizado. Usada para
+      justificar O(r) amortizado al reconstruir una ruta de r nodos en Dijkstra propio.
+- [x] NetworkX 3.7. `single_source_dijkstra_path_length`.
+      https://networkx.org/documentation/stable/reference/algorithms/generated/networkx.algorithms.shortest_paths.weighted.single_source_dijkstra_path_length.html
+      Consultada el 2026-11-12: distancias desde un origen a nodos alcanzables, suma de
+      atributos de pesos numéricos. Usada solo como oráculo de R2, no para generar la
+      matriz de producción ni atribuir complejidad a Java.
+- [x] Oracle. *Java SE 21 API*, `java.util.PriorityQueue`.
+      https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/PriorityQueue.html
+      Consultada el 2026-11-12: offer/poll O(log n), peek/size O(1). Se usa el montículo
+      estándar como estructura de apoyo; Dijkstra y su borrado perezoso son propios.
+- [x] Sedgewick, R. y Wayne, K. *Algorithms, 4th edition*, sitio del libro, §4.4 Shortest Paths.
+      https://algs4.cs.princeton.edu/44sp/
+      Consultada el 2026-11-12: relajación, distancias/predecesores, selección del mínimo
+      y condición de pesos no negativos. La implementación del sitio usa IndexMinPQ;
+      no se copia ni se atribuye a esa cola nuestra memoria O(V+E): el documento deriva
+      aparte el costo del borrado perezoso con PriorityQueue.
+- [x] Spring Boot. *Gradle Plugin: Running your Application with Gradle*.
+      https://docs.spring.io/spring-boot/gradle-plugin/running.html
+      Consultada el 2026-11-12: bootRun optimiza el arranque de desarrollo por defecto;
+      `optimizedLaunch=false` desactiva esa política. Página consultada 4.1.2, plugin local
+      4.1.1. El comando maquina local confirmó TieredStopAtLevel=1 antes del cambio;
+      el segundo comando maquina confirmó su ausencia tras desactivarlo, sin actualizar dependencias.
 - [x] Python Software Foundation. *Python 3.14 Library Reference*, `multiprocessing`.
       https://docs.python.org/3.14/library/multiprocessing.html
       Consultada el 2026-11-11: secciones Contexts and start methods, Process and exceptions,

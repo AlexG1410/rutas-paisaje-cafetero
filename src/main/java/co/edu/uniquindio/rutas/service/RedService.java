@@ -26,7 +26,11 @@ public class RedService {
                 throw new IllegalStateException(
                         "Falta data/processed: ejecutar primero python -m preparacion procesar");
             }
-            grafo = construir(redRepository.leer());
+            try {
+                grafo = construir(redRepository.leer());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalStateException("Red procesada inválida: " + e.getMessage(), e);
+            }
         }
         return grafo;
     }

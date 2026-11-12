@@ -1,0 +1,11 @@
+origen,destino,tiempo_lineal_s,tiempo_cola_s,coinciden
+cab_pijao,ac_coocafeq_pijao,6.83107252038405,6.83107252038405,true
+fh_san_alberto,cab_buenavista,28.269910835743634,28.269910835743634,true
+fh_mirador_palmas,fh_mocawa_resort,492.55301015179805,492.55301015179805,true
+atr_parque_cafe,ac_central_el_agrado,421.1449157206789,421.1449157206789,true
+cab_calarca,atr_recuca,1996.4660384716478,1996.4660384716478,true
+atr_parque_vida,cab_armenia,348.410960244094,348.410960244094,true
+fh_mirador_palmas,cab_la_tebaida,875.2803876196172,875.2803876196172,true
+ac_coocafeq_calarca,fh_combia,855.4659684410525,855.4659684410525,true
+ac_coocafeq_armenia,atr_parque_vida,507.4489376589893,507.4489376589893,true
+atr_parque_fundadores,atr_museo_oro_quimbaya,464.03829342613903,464.03829342613903,true

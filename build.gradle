@@ -49,6 +49,8 @@ tasks.named('test') {
 //   ./gradlew bootRun --args='r2'
 // Memoria fija para que todas las mediciones usen el mismo montículo de la JVM.
 tasks.named('bootRun') {
+    // No alterar el JIT para optimizar arranque: se usa para experimentos reproducibles.
+    optimizedLaunch = false
     workingDir = rootDir
     jvmArgs = ['-Xms2g', '-Xmx2g', '-Xss16m']
 }

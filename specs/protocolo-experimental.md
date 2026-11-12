@@ -17,6 +17,16 @@ Estado: aprobada · Aplica a todas las mediciones de R1–R4. Paquetes reorganiz
 
 ## Condiciones de ejecución (Java)
 
+Precisión del aislamiento Java para R2 (2026-11-12): la hija envía `INICIO` después
+de preparar/deserializar entradas y recolectar basura, justo antes de cronometrar cada
+llamada. El padre aplica el límite de 300 s a esa ejecución, no a arranque/preparación.
+Entre ejecuciones y durante arranque/transferencia se permiten 60 s de infraestructura;
+agotarlos es error, no timeout experimental. También se rechaza como no completada una
+duración reportada >límite si el padre recibió tarde el mensaje. Se termina y recoge
+el proceso propio en éxito, timeout o error. Prueba P6.J-a: constructor de tarea lento
+y función rápida con límite reducido no agotan el límite experimental; P6.J-b: tarea
+lenta sí se termina y no deja proceso activo. Estas son pruebas, no mediciones reales.
+
 ### Regla de ejecución superior a un minuto (precisión 2026-11-11)
 
 La regla 6.3 se aplica a cualquier ejecución, no solo al calentamiento ni a la primera
@@ -41,6 +51,10 @@ La evidencia e historial de verificaciones están en `docs/registro-ia.md`.
 
 - Medir siempre con `./gradlew bootRun --args='rN'`: fija `-Xms2g -Xmx2g -Xss16m` y el
   directorio de trabajo. Nunca medir desde JUnit, el IDE o el depurador.
+- `bootRun.optimizedLaunch=false`: no limitar el JIT al nivel 1 para favorecer arranque
+  de desarrollo. Las JVM hijas usan también Xms=Xmx del padre y Xss16m. Registrar de
+  nuevo máquina/argumentos antes de medir al cambiar esta configuración; no comparar
+  tiempos entre configuraciones diferentes sin explicarlo. R1.3 Python no se ve afectado.
 - `System.gc()` antes de cada ejecución (lo hace `Medidor`) para que la basura de la anterior
   no se recoja dentro de la siguiente.
 - El resultado de cada ejecución se conserva (`Medicion.resultado`) para verificarlo y para

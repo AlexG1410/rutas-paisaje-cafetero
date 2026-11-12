@@ -3,6 +3,7 @@ package co.edu.uniquindio.rutas.algorithm;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import co.edu.uniquindio.rutas.model.Arista;
 import co.edu.uniquindio.rutas.model.Grafo;
@@ -14,6 +15,41 @@ import org.junit.jupiter.api.Test;
 
 /** Casos T2-* de specs/R2-caminos-minimos.md. Cada caso se prueba en las dos versiones. */
 class DijkstraTest {
+
+    @Test void t2i_cerosEmpatesYEntradasObsoletas() {
+        Grafo g = Grafo.dirigido(5, new double[][] {
+                {0, 1, 10}, {0, 2, 1}, {2, 1, 1}, {1, 3, 0}, {3, 1, 0}, {2, 3, 1}});
+        for (Version v : VERSIONES) {
+            var r = v.ejecutor().ejecutar(g, 0, Dijkstra.SIN_DESTINO);
+            assertArrayEquals(new double[] {0, 2, 1, 2, Double.POSITIVE_INFINITY}, r.distancias());
+            assertEquals(4, r.nodosExplorados());
+            var camino = v.ejecutor().ejecutar(g, 0, 3);
+            assertArrayEquals(new int[] {0, 2, 3}, camino.ruta());
+        }
+    }
+
+    @Test void t2j_entradasInvalidasYReconstruccion() {
+        for (Version v : VERSIONES) {
+            assertThrows(IllegalArgumentException.class, () -> v.ejecutor().ejecutar(null, 0, 1));
+            assertThrows(IllegalArgumentException.class, () -> v.ejecutor().ejecutar(grafoGuia(), -1, 1));
+            assertThrows(IllegalArgumentException.class, () -> v.ejecutor().ejecutar(grafoGuia(), 0, 7));
+            assertThrows(IllegalArgumentException.class, () -> v.ejecutor().ejecutar(grafoGuia(), 0, -2));
+        }
+        assertArrayEquals(new int[] {0, 1, 2}, Dijkstra.reconstruirRuta(new int[] {-1, 0, 1}, 0, 2));
+        assertArrayEquals(new int[0], Dijkstra.reconstruirRuta(new int[] {-1, -1, 1}, 0, 2));
+        assertThrows(IllegalArgumentException.class,
+                () -> Dijkstra.reconstruirRuta(new int[] {-1, 2, 1}, 0, 2));
+        assertThrows(IllegalArgumentException.class,
+                () -> Dijkstra.reconstruirRuta(new int[] {-1, 9}, 0, 1));
+    }
+
+    @Test void t2k_sumaNoFinitaNoEsInalcanzable() {
+        Grafo g = Grafo.dirigido(3, new double[][] {
+                {0, 1, Double.MAX_VALUE}, {1, 2, Double.MAX_VALUE}});
+        for (Version v : VERSIONES) {
+            assertThrows(IllegalArgumentException.class, () -> v.ejecutor().ejecutar(g, 0, 2));
+        }
+    }
 
     private static final double TOL = 1e-6;
 
@@ -131,7 +167,7 @@ class DijkstraTest {
 
     @Test
     void t2h_distanciasCompletasContraBellmanFord() {
-        Random azar = new Random(7);
+        Random azar = new Random(2026);
         Grafo g = grafoAlAzar(azar, 80, 320);
         double[] esperado = bellmanFord(g, 0);
         double[] obtenido = Dijkstra.colaPrioridad(g, 0, Dijkstra.SIN_DESTINO).distancias();

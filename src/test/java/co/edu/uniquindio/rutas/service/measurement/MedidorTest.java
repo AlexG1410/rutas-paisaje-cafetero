@@ -12,6 +12,39 @@ import org.junit.jupiter.api.Test;
 /** Protocolo experimental (sección 6) aplicado por el arnés. */
 class MedidorTest {
 
+    public static final class IdentificarProceso implements Tarea<Integer, Long> {
+        @Override public Long ejecutar(Integer ignorado) {
+            return ProcessHandle.current().pid();
+        }
+    }
+
+    @Test void p6jb_recogeHijosTrasExitoYTimeout() {
+        var antes = ProcessHandle.current().children().map(ProcessHandle::pid).sorted().toList();
+        var m = Medidor.medirConLimite(IdentificarProceso.class, 0, 1, 0, 60, 30);
+        assertTrue(m.completada());
+        assertTrue((Long) m.resultado() != ProcessHandle.current().pid());
+        var lenta = Medidor.medirConLimite(Dormir.class, 2000, 1, 0, 60, 0.1);
+        assertFalse(lenta.completada());
+        assertEquals(antes, ProcessHandle.current().children().map(ProcessHandle::pid).sorted().toList());
+    }
+
+    public static final class PrepararLento implements Tarea<Integer, Integer> {
+        public PrepararLento() {
+            new Dormir().ejecutar(350);
+        }
+
+        @Override public Integer ejecutar(Integer valor) {
+            return valor;
+        }
+    }
+
+    @Test void p6ja_preparacionNoConsumeLimiteExperimental() {
+        var m = Medidor.medirConLimite(PrepararLento.class, 123, 1, 0, 60, 0.1);
+        assertTrue(m.completada());
+        assertEquals(123, m.resultado());
+        assertTrue(m.medianaMs() < 100);
+    }
+
     /** Tarea de prueba con calentamiento breve y una repetición posterior lenta. */
     public static final class DemoraPosterior implements Tarea<Integer, Integer> {
         private int llamadas;

@@ -19,6 +19,13 @@ sección para cada una de las tres partes.
 
 ## Flujo de trabajo por requerimiento
 
+### Estado actual del bloque R2 (2026-11-12)
+
+Implementación Java, pruebas, 30 consultas medidas, matriz 40×40, verificación NetworkX
+(30 rutas/costos y 1600 celdas), figura y análisis disponibles. Python 142/142; suite
+Java completa 70/84 aprobadas, con 14 fallos por R3/R4 pendientes. La arquitectura pasa.
+Las líneas base posteriores son históricas. Contratos y evidencia detallada en R2.
+
 ### Organización Java (actualizada el 2026-11-10)
 
 Los paquetes usan nombres en inglés: `controller`, `cli`, `service` (con

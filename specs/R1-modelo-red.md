@@ -13,8 +13,9 @@ documentación y figura disponibles, en revisión de cierre. Responsable: _(asig
 - Contratos y pruebas se definen abajo. La evidencia de ejecución y la evolución de
   decisiones se conservan en `docs/registro-ia.md` y `docs/decisiones.md`, no como estados
   históricos superpuestos en esta spec.
-- Pendientes de cierre: revisión final del documento y robustez de entradas Java
-  señalada en `docs/revision-superficial.md`. R2–R4 pendientes no se consideran fallos de R1.
+- Robustez de entradas Java cerrada con el bloque R2: pesos no finitos/negativos,
+  tamaños y coordenadas inválidas se rechazan; se admiten cero y opcionales null en pruebas.
+  Revisión final del documento a cargo del grupo. R3/R4 pendientes no son fallos de R1.
 
 ## Objetivo
 
@@ -299,6 +300,13 @@ documentar qué se usó.
    (`results/r1/tamano_red.csv`).
 
 ## Restricciones
+
+Validación de `Grafo.desdeArreglos` (cierre previo a R2): n >= 0, arreglos de aristas
+no nulos y de igual longitud; pesos finitos y no negativos. Cada arreglo opcional de
+OSM IDs/coordenadas, si está presente, tiene longitud n; coordenadas finitas. Se permiten
+arreglos opcionales null en pruebas y pesos cero. Error: `IllegalArgumentException`,
+antes de construir listas. Casos T1.G-a: NaN/infinito/negativos; T1.G-b: tamaños,
+coordenadas o entradas nulas inválidas; T1.G-c: grafo vacío y pesos cero válidos.
 
 - `NodoMasCercano` es implementación propia (`algorithm`, solo `java.lang`/`java.util`).
 - En `python/` se permiten OSMnx, GeoPandas, pyproj, pandas, NumPy (datos y verificación).

@@ -223,6 +223,7 @@ Orden completo para reproducir: ver `README.md`.
 | Medición | `Medidor`: 1 calentamiento + 5 reps, mediana, ms; JVM hija con límite de 5 min | tomada |
 | Semilla | `Constantes.SEMILLA = 2026` | tomada |
 | Dijkstra con cola | `PriorityQueue` con borrado perezoso | tomada |
+| Experimento R2 | 10 pares intramunicipales + 10 intermunicipales reproducibles; ambas versiones incluyen reconstrucción; matriz Java de segundos a 3 decimales | tomada (2026-11-12, D13) |
 | Envolvente | QuickHull (alternativa: por mezcla) | propuesta — confirmar en R3 |
 | Heurística R4 | Vecino más cercano | propuesta — confirmar en R4 |
 | Velocidades sin `maxspeed` | Promedio por tipo con OSMnx; respaldo promedio entre tipos con datos; límites múltiples por mínimo | tomada (R1.2); detalle en spec |

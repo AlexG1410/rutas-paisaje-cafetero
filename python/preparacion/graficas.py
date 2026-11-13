@@ -28,16 +28,72 @@ from preparacion.config import FIGURAS, RESULTS
 
 
 def ejecutar() -> None:
-    """Genera figuras de R1/R2/R3 disponibles; no exige resultados de bloques futuros."""
+    """Genera figuras de R1–R4 disponibles; no exige resultados de bloques futuros."""
     disponibles = False
     for archivo, generar in (("r1/tiempo_componente.csv", graficar_componente),
                              ("r2/mediciones_dijkstra.csv", graficar_dijkstra),
-                             ("r3/envolvente.csv", graficar_envolvente)):
+                             ("r3/envolvente.csv", graficar_envolvente),
+                             ("r4/exactas.csv", graficar_tsp)):
         if (RESULTS / archivo).exists():
             generar()
             disponibles = True
     if not disponibles:
-        raise FileNotFoundError("No hay CSV experimentales de R1/R2/R3 para graficar")
+        raise FileNotFoundError("No hay CSV experimentales de R1/R2/R3/R4 para graficar")
+
+
+def graficar_tsp() -> None:
+    """Tiempos exactos y cocientes entre tamaños consecutivos, sin imputar timeouts."""
+    archivo = RESULTS / "r4" / "exactas.csv"
+    tabla = pd.read_csv(archivo)
+    metodos = ("fuerza_bruta", "held_karp")
+    requeridas = {"k"} | {f"{prefijo}_{m}" for m in metodos
+                             for prefijo in ("estado", "tiempo")}
+    requeridas = {c + "_ms" if c.startswith("tiempo_") else c for c in requeridas}
+    if tabla.empty or not requeridas.issubset(tabla.columns):
+        raise ValueError("Tabla R4 vacía o con columnas faltantes")
+    if (tabla.k.duplicated().any()
+            or not all(math.isfinite(float(k)) and k > 0 and k == int(k) for k in tabla.k)):
+        raise ValueError("k de R4 debe ser entero positivo y único")
+    tabla = tabla.sort_values("k")
+    cocientes = []
+    for metodo in metodos:
+        anterior = None
+        for fila in tabla.to_dict("records"):
+            k, estado, tiempo = fila["k"], fila[f"estado_{metodo}"], fila[f"tiempo_{metodo}_ms"]
+            if estado == "completada":
+                if not math.isfinite(float(tiempo)) or tiempo <= 0:
+                    raise ValueError("Tiempo R4 debe ser finito y positivo para escala logarítmica")
+                if anterior is not None and k == anterior[0] + 1:
+                    previo, tiempo_previo = anterior
+                    modelo = k * k / previo if metodo == "fuerza_bruta" else 2 * (k / previo)**2
+                    razon = tiempo / tiempo_previo
+                    if not math.isfinite(razon):
+                        raise ValueError("Cociente R4 no finito")
+                    cocientes.append((metodo, previo, k, razon, modelo))
+                anterior = (k, tiempo)
+            elif estado == "no completada" and pd.isna(tiempo):
+                anterior = None
+            else:
+                raise ValueError("Estado R4 desconocido o timeout con tiempo ficticio")
+    columnas = ["metodo", "k_anterior", "k", "razon_observada", "razon_modelo"]
+    FIGURAS.mkdir(parents=True, exist_ok=True)
+    fig, ax = plt.subplots()
+    try:
+        for posicion, metodo in enumerate(metodos):
+            completas = tabla[f"estado_{metodo}"].eq("completada")
+            ax.plot(tabla.k, tabla[f"tiempo_{metodo}_ms"].where(completas), "o-", label=metodo)
+            for k in tabla.loc[~completas, "k"]:
+                ax.annotate(f"{metodo}: no completada", (k, 0.08 + posicion * 0.12),
+                            xycoords=("data", "axes fraction"), rotation=45, fontsize=7)
+        ax.set_yscale("log")
+        ax.set(title="TSP: soluciones exactas", xlabel="Atractivos o destinos k", ylabel="Tiempo (ms)")
+        ax.set_xticks(tabla.k)
+        ax.legend()
+        fig.tight_layout()
+        fig.savefig(FIGURAS / "r4_tiempo_vs_k.png", dpi=150)
+        pd.DataFrame(cocientes, columns=columnas).to_csv(archivo.parent / "cocientes_tiempos.csv", index=False)
+    finally:
+        plt.close(fig)
 
 
 def graficar_componente() -> None:

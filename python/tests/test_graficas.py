@@ -217,3 +217,60 @@ def test_t3fb_normalizacion_rechaza_tamano_invalido(entorno, n):
     with pytest.raises(ValueError):
         graficas.graficar_envolvente()
     assert salida.read_text(encoding="utf-8") == "anterior"
+
+
+def test_t4fa_figura_log_y_cocientes(entorno, monkeypatch):
+    origen, _ = entorno
+    carpeta = origen.parent.parent / "r4"
+    carpeta.mkdir()
+    pd.DataFrame({"k": [5, 6, 7], "tiempo_fuerza_bruta_ms": [5, 36, None],
+                  "tiempo_held_karp_ms": [1, 3, 5],
+                  "estado_fuerza_bruta": ["completada", "completada", "no completada"],
+                  "estado_held_karp": ["completada"] * 3}).to_csv(carpeta / "exactas.csv", index=False)
+    from matplotlib.figure import Figure
+    guardar = Figure.savefig
+
+    def comprobar(self, *args, **kwargs):
+        if str(args[0]).endswith("r4_tiempo_vs_k.png"):
+            assert self.axes[0].get_yscale() == "log"
+            assert any("no completada" in t.get_text() for t in self.axes[0].texts)
+        return guardar(self, *args, **kwargs)
+
+    monkeypatch.setattr(Figure, "savefig", comprobar)
+    graficas.ejecutar()
+    tabla = pd.read_csv(carpeta / "cocientes_tiempos.csv")
+    assert len(tabla) == 3
+    bf = tabla[tabla.metodo.eq("fuerza_bruta")].iloc[0]
+    assert bf.razon_observada == pytest.approx(7.2)
+    assert bf.razon_modelo == pytest.approx(7.2)
+    hk = tabla[tabla.metodo.eq("held_karp")].iloc[0]
+    assert hk.razon_observada == 3
+    assert hk.razon_modelo == pytest.approx(2 * (6 / 5)**2)
+    assert (graficas.FIGURAS / "r4_tiempo_vs_k.png").exists()
+    assert not plt.get_fignums()
+
+
+@pytest.mark.parametrize("malo", [0, -1, float("inf")])
+def test_t4fa_tiempo_invalido_no_publica(entorno, malo):
+    origen, _ = entorno
+    carpeta = origen.parent.parent / "r4"
+    carpeta.mkdir()
+    pd.DataFrame({"k": [5], "tiempo_fuerza_bruta_ms": [malo], "tiempo_held_karp_ms": [1],
+                  "estado_fuerza_bruta": ["completada"], "estado_held_karp": ["completada"]}).to_csv(
+        carpeta / "exactas.csv", index=False)
+    with pytest.raises(ValueError):
+        graficas.graficar_tsp()
+    assert not (carpeta / "cocientes_tiempos.csv").exists()
+
+
+def test_t4fa_solo_timeout_y_saltos_sin_cocientes(entorno):
+    origen, _ = entorno
+    carpeta = origen.parent.parent / "r4"
+    carpeta.mkdir()
+    pd.DataFrame({"k": [5, 7], "tiempo_fuerza_bruta_ms": [None] * 2,
+                  "tiempo_held_karp_ms": [None] * 2,
+                  "estado_fuerza_bruta": ["no completada"] * 2,
+                  "estado_held_karp": ["no completada"] * 2}).to_csv(carpeta / "exactas.csv", index=False)
+    graficas.graficar_tsp()
+    assert pd.read_csv(carpeta / "cocientes_tiempos.csv").empty
+    assert not plt.get_fignums()

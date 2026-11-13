@@ -4,20 +4,24 @@
 sección). Al verificarla, marcar `[x]` y anotar exactamente qué se usó.
 
 ## Libros y artículos
-- [ ] Rényi, A. y Sulanke, R. (1963). *Über die konvexe Hülle von n zufällig
+- [x] Rényi, A. y Sulanke, R. (1963). *Über die konvexe Hülle von n zufällig
       gewählten Punkten*. Zeitschrift für Wahrscheinlichkeitstheorie und verwandte
       Gebiete, 2, 75–84. DOI: https://doi.org/10.1007/BF00535300.
       Ficha bibliográfica contrastada el 2026-11-12 con la lista del coautor:
       https://www.math.hu-berlin.de/~sulanke/sulanke-pub.html, entrada [5].
-      [FUENTE PENDIENTE: consultar el artículo original, localizar el resultado para
-      puntos independientes uniformes en un polígono convexo de r lados y verificar
-      el término principal (2r/3)·ln n y sus hipótesis; r=4 daría (8/3)·ln n].
-      El acceso de Springer devolvió un bloqueo de carga. Se localizaron referencias
-      secundarias (Devroye, 1983, *Moment inequalities for random variables in
-      computational geometry*, https://luc.devroye.org/devroye_1983_moment_inequalities_random_geometry.pdf),
-      pero no se sustituyó la comprobación del original solicitada. La fórmula y sus
-      valores numéricos quedan fuera del informe hasta completar esa consulta.
-      Distinguir el modelo uniforme continuo de nuestra cuadrícula entera fija.
+      Original consultado el 2026-11-12 en `docs/guias/über die páginas 75-84.pdf`
+      (copia local excluida de Git), texto y facsímil contrastados. Introducción p. 75:
+      puntos independientes con la misma distribución; §1: uniforme en el interior
+      de un polígono convexo fijo K de r lados. Teorema 1, p. 78 (página 4 del PDF),
+      ecuación (20): E_n=(2r/3)(ln n+γ)+(2/3)ln((∏f_i)/F^r)+o(1), donde F es el área
+      de K, f_i el área del triángulo de tres vértices consecutivos y γ la constante
+      de Euler. El artículo cuenta lados, equivalentes a vértices para el casco
+      poligonal no degenerado (probabilidad uno en este modelo continuo con n≥3).
+      Para un cuadrado, r=4 y f_i=F/2: E[h]=(8/3)(ln n+γ−ln 2)+o(1), de donde
+      E[h]∼(8/3)ln n y E[h]=O(log n). Se usa este resultado para el modelo continuo;
+      la deducción E[T]=O(n log n) desde nuestra cota O(nh) es propia, con operaciones
+      de costo constante. La cuadrícula entera fija y la red vial tienen otras
+      distribuciones. La referencia original reemplaza la consulta secundaria pendiente.
 - [ ] Cormen, T. H., Leiserson, C. E., Rivest, R. L. y Stein, C. (2022). *Introduction to
       algorithms* (4.ª ed.). MIT Press. — Dijkstra, montículos binarios, caminos mínimos,
       envolvente convexa, Teorema Maestro. (Verificar números de capítulo en la edición usada.)

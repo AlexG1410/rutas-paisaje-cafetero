@@ -31,6 +31,11 @@ datos finales apoyan esa elección: la envolvente de 8791 puntos tiene 14 vérti
 (`results/r3/envolvente.csv`). Con pocos vértices extremos, QuickHull puede descartar
 gran parte de los puntos interiores en los primeros niveles.
 
+La elección también tiene apoyo teórico para puntos aleatorios uniformes en un
+cuadrado: el resultado de Rényi y Sulanke (1963, teorema 1) establece que el número
+esperado de vértices crece logarítmicamente. La sección siguiente relaciona ese
+resultado con la cota O(nh) de nuestra variante.
+
 1. Recorrer la entrada para encontrar los extremos lexicográficos A y B.
 2. Separar candidatos a la derecha de A→B (cadena inferior) y B→A (superior).
 3. Para un segmento a→b, elegir el punto p más alejado por producto cruz (menor valor
@@ -74,6 +79,7 @@ ordenan los puntos dentro ni fuera del algoritmo.
 | Mejor caso, descarte rápido; por ejemplo, puntos colineales | Θ(n) | Barridos iniciales obligatorios y ningún subproblema creciente |
 | Modelo de particiones equilibradas sin descarte importante | O(n log n) | Cota por `T(m)=2T(m/2)+O(m)` |
 | Promedio para una distribución de entradas de tamaño n | E[T]=O(n·E[h]), acotado por O(n²) | Derivación propia por niveles; no se presupone una ley para h |
+| Esperado bajo muestreo independiente uniforme continuo en un cuadrado | O(n log n) | E[h]=O(log n) por Rényi y Sulanke (1963), combinado con O(nh) |
 | Peor caso, particiones muy desequilibradas | O(n²) | Expansión de `T(m)≤T(m−1)+c·m+d` |
 
 En el modelo equilibrado, el Teorema Maestro de la guía 07 usa a=2, b=2, d=1 y
@@ -89,11 +95,30 @@ distinto, de modo que hay O(h) niveles como máximo. Por tanto, para una distrib
 de entradas de tamaño n, tomar esperanza da `E[T] ≤ C·n·E[h]+C'·n`. Para n≥1, h≥1,
 esto es O(n·E[h]) y, usando h≤n, O(n²).
 
-Para un modelo con E[h]=O(log n), la misma derivación da E[T]=O(n log n), sin
-necesitar particiones equilibradas. La revisión bibliográfica del modelo uniforme
-continuo en un cuadrado queda identificada en `docs/fuentes.md` como pendiente de
-consulta del artículo original de Rényi y Sulanke. El generador del experimento usa
-una cuadrícula entera fija; su distribución se distingue de ese modelo continuo.
+**Promedio bajo distribución uniforme continua.** Rényi y Sulanke (1963, §1,
+teorema 1, p. 78, ecuación (20)) consideran puntos independientes uniformes en
+un polígono convexo fijo de r lados. Su resultado implica
+`E[h]=(2r/3)·ln n+O(1)`. El artículo cuenta lados del casco; en este modelo el
+casco es un polígono no degenerado con probabilidad uno para n≥3, y tiene tantos
+lados como vértices.
+
+En el cuadrado, r=4, por lo que `E[h]∼(8/3)·ln n`. La ecuación original también
+incluye una constante dependiente de la forma: al sustituir las áreas de los
+triángulos de tres esquinas consecutivas, cada una igual a la mitad del área del
+cuadrado, se obtiene `E[h]=(8/3)·(ln n+γ−ln 2)+o(1)`, con γ la constante de Euler.
+Así, `(8/3)·ln n` es el término principal asintótico, no el valor exacto esperado
+para una muestra finita ni un número de vértices que deba cumplir cada ejecución.
+
+Combinando el resultado con la cota anterior:
+
+`E[T] ≤ C·n·E[h]+C'·n = O(n log n)`.
+
+Esta cota esperada procede de la distribución y del tamaño de salida, sin exigir
+particiones equilibradas ni aplicar el Teorema Maestro. Se interpreta en el modelo
+de operaciones geométricas de costo constante. Los cuadrados del experimento son
+muestras pseudoaleatorias de una cuadrícula entera fija: el resultado continuo
+sirve como referencia teórica, mientras que su extensión a ese generador requiere
+un análisis discreto. Los nodos de la red vial tampoco son muestras uniformes.
 
 La aritmética es sobre `long` de tamaño fijo y cada giro cuesta O(1) en ese modelo.
 La copia ocupa O(n), la salida O(h), y cada llamada mantiene solo índices, puntos y
@@ -211,6 +236,10 @@ el peor caso y la estabilidad entre semillas o máquinas quedan fuera del experi
 
 ### Fuentes
 
+- Rényi, A. y Sulanke, R. (1963). *Über die konvexe Hülle von n zufällig gewählten
+  Punkten*. Zeitschrift für Wahrscheinlichkeitstheorie und verwandte Gebiete, 2,
+  75–84. §1, teorema 1, p. 78, ecuación (20); hipótesis en la introducción, p. 75.
+  https://doi.org/10.1007/BF00535300.
 - Barber, C. B., Dobkin, D. P. y Huhdanpaa, H. (1996). *The Quickhull Algorithm for
   Convex Hulls*. ACM TOMS, 22(4), 469–483. Referencia en
   https://raw.githubusercontent.com/qhull/qhull/master/README.txt.

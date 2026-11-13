@@ -26,6 +26,10 @@ public class EntornoService {
     }
 
     public Map<String, String> registrar() {
+        return registrarEn(ARCHIVO);
+    }
+
+    Map<String, String> registrarEn(String nombre) {
         Map<String, String> info = maquina.informacion();
         List<Map<String, String>> filas = new ArrayList<>();
         info.forEach((clave, valor) -> {
@@ -34,7 +38,7 @@ public class EntornoService {
             fila.put("valor", valor);
             filas.add(fila);
         });
-        resultados.guardar(ARCHIVO, filas);
+        resultados.guardar(nombre, filas);
         return info;
     }
 }

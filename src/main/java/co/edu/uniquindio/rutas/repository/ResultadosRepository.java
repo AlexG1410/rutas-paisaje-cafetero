@@ -35,6 +35,19 @@ public class ResultadosRepository {
             "tiempo_propio_ms", "repeticiones", "semilla", "estado");
     public static final List<String> COLUMNAS_ENVOLVENTE_RED_R3 =
             List.of("orden", "x", "y", "idx_nodo", "lat", "lon");
+    public static final List<String> COLUMNAS_INSTANCIAS_R4 = List.of("tipo", "k", "numero", "semilla", "partida", "lugares");
+    public static final List<String> COLUMNAS_EXACTAS_R4 = List.of("k", "tiempo_fuerza_bruta_ms", "estado_fuerza_bruta",
+            "tiempo_held_karp_ms", "estado_held_karp", "costo_fuerza_bruta_s", "costo_held_karp_s", "coinciden",
+            "repeticiones_fuerza_bruta", "repeticiones_held_karp", "semilla", "fase_fuerza_bruta", "fase_held_karp");
+    public static final List<String> COLUMNAS_MEMORIA_R4 = List.of("k", "entradas", "bytes_dp", "bytes_predecesores", "bytes_estimados");
+    public static final List<String> COLUMNAS_CALIDAD_DETALLE_R4 = List.of("k", "numero", "semilla", "costo_held_karp_s",
+            "costo_heuristica_s", "brecha_pct", "recorrido_held_karp", "recorrido_heuristica");
+    public static final List<String> COLUMNAS_CALIDAD_R4 = List.of("k", "instancias", "brecha_promedio_pct", "brecha_maxima_pct");
+    public static final List<String> COLUMNAS_ITINERARIO_R4 = List.of("orden", "id_lugar", "lugar", "desplazamiento_min", "visita_min", "tiempo_acumulado_h");
+    public static final List<String> COLUMNAS_RESUMEN_R4 = List.of("partida", "atractivos_iniciales", "atractivos_finales", "retirados",
+            "total_visitas_min", "total_desplazamientos_min", "duracion_jornada_min", "limite_min", "duracion_inicial_min");
+    public static final List<String> COLUMNAS_RETIROS_R4 = List.of("paso", "id_retirado", "duracion_antes_min", "duracion_despues_min", "reduccion_min");
+    public static final List<String> COLUMNAS_VORAZ_R4 = List.of("caso", "k", "costo_optimo_s", "costo_voraz_s", "brecha_pct", "recorrido_optimo", "recorrido_voraz");
 
     /** R1.4: admite cero lejanos y conserva la cabecera. */
     public Path guardarLugaresLejanos(List<FilaLugarNodo> filas) {
@@ -61,7 +74,11 @@ public class ResultadosRepository {
         if (filas.isEmpty()) {
             throw new IllegalArgumentException("No hay filas para " + nombre);
         }
-        List<String> encabezado = List.copyOf(filas.getFirst().keySet());
+        return guardar(nombre, List.copyOf(filas.getFirst().keySet()), filas);
+    }
+
+    /** Cabecera explícita, incluso sin filas (por ejemplo, un itinerario sin retiros). */
+    public Path guardar(String nombre, List<String> encabezado, List<? extends Map<String, ?>> filas) {
         List<List<Object>> valores = new ArrayList<>();
         for (Map<String, ?> fila : filas) {
             List<Object> celdas = new ArrayList<>();

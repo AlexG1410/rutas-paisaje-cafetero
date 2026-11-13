@@ -71,4 +71,7 @@ public final class Constantes {
     public static final int JORNADA_MIN = 11 * 60;
     public static final int ATRACTIVOS_MIN = 6;
     public static final int ATRACTIVOS_MAX = 8;
+    public static final List<String> ATRACTIVOS_ITINERARIO = List.of("atr_museo_oro_quimbaya",
+            "atr_jardin_botanico", "atr_valle_cocora", "atr_colina_iluminada",
+            "atr_bejuco_canasto", "atr_parque_vida", "atr_calle_real", "atr_alto_cruz");
 }

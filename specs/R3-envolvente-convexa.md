@@ -10,11 +10,16 @@ tiempo_propio_ms,tiempo_scipy_ms,propio_us_por_punto,scipy_us_por_punto,
 estado_propio,estado_scipy`. Se calcula `1000·tiempo_ms/n`; n debe ser entero positivo
 y cada timeout conserva su tiempo y normalización vacíos. Casos T3.F-b: fórmula,
 tamaño inválido y timeout. Los CSV medidos mantienen su contrato y contenido.
-La incorporación de Rényi–Sulanke requiere verificar el artículo original y distinguir
-el modelo uniforme continuo del generador entero; hasta entonces, fuente pendiente.
+Rényi–Sulanke verificado en el artículo original aportado localmente: introducción
+p. 75 (independencia y distribución uniforme), §1, teorema 1, p. 78, ecuación (20).
+Para un polígono convexo fijo de r lados, E[h]=(2r/3)·ln n+O(1); para el cuadrado,
+E[h]=(8/3)·ln n+O(1). Combinado con O(nh), da tiempo esperado O(n log n) bajo ese
+modelo continuo y aritmética de costo constante. El documento distingue este modelo
+del generador entero del experimento y de los nodos viales. No cambia el contrato
+del algoritmo, el generador ni los CSV; el PDF permanece local en docs/guias/.
 Verificación de esta mejora: Python 171/171 y Java focalizado en EnvolventeConvexa,
 ExperimentoR3Service y arquitectura aprobado. Normalización generada con `graficas`;
-mediciones y algoritmos originales conservados. Revisión bibliográfica original pendiente.
+mediciones y algoritmos originales conservados. Revisión bibliográfica original completada.
 
 Evidencia: cuatro conjuntos coinciden con SciPy antes y después de medir; cinco
 repeticiones por método sin timeout. Red: 8791 puntos y 14 vértices. Tabla final,

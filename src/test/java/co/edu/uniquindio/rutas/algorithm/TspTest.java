@@ -3,6 +3,7 @@ package co.edu.uniquindio.rutas.algorithm;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import co.edu.uniquindio.rutas.model.ResultadoTsp;
 import java.util.ArrayList;
@@ -13,6 +14,73 @@ import org.junit.jupiter.api.Test;
 
 /** Casos T4-* de specs/R4-ruta-optima.md. */
 class TspTest {
+
+    private List<Nombrado> todos() {
+        var todos = new ArrayList<>(EXACTOS);
+        todos.add(new Nombrado("voraz", VecinoMasCercano::resolver));
+        return todos;
+    }
+
+    @Test void t4i_entradasInvalidas() {
+        for (var m : todos()) {
+            assertThrows(IllegalArgumentException.class, () -> m.metodo().resolver(null, new int[] {0}));
+            assertThrows(IllegalArgumentException.class, () -> m.metodo().resolver(MATRIZ_GUIA, null));
+            for (int[] lugares : List.of(new int[0], new int[] {0, 0}, new int[] {-1}, new int[] {4})) {
+                assertThrows(IllegalArgumentException.class, () -> m.metodo().resolver(MATRIZ_GUIA, lugares));
+            }
+            assertThrows(IllegalArgumentException.class,
+                    () -> m.metodo().resolver(new double[][] {{0, 1}, {1}}, new int[] {0}));
+            for (double malo : new double[] {-1, Double.NaN, Double.POSITIVE_INFINITY}) {
+                assertThrows(IllegalArgumentException.class,
+                        () -> m.metodo().resolver(new double[][] {{0, malo}, {1, 0}}, new int[] {0, 1}));
+            }
+            assertThrows(IllegalArgumentException.class, () -> m.metodo().resolver(
+                    new double[][] {{0, Double.MAX_VALUE}, {Double.MAX_VALUE, 0}}, new int[] {0, 1}));
+        }
+        for (int k : new int[] {-1, 58, 64}) {
+            assertThrows(IllegalArgumentException.class, () -> HeldKarp.entradasTabla(k));
+        }
+        assertEquals(57L * (1L << 57), HeldKarp.entradasTabla(57));
+        assertThrows(IllegalArgumentException.class,
+                () -> HeldKarp.resolver(new double[22][22], java.util.stream.IntStream.range(0, 22).toArray()));
+    }
+
+    @Test void t4j_empatesCerosYEntradaIntacta() {
+        double[][] matriz = new double[4][4];
+        for (int i = 0; i < 4; i++) for (int j = 0; j < 4; j++) matriz[i][j] = i == j ? 0 : 1;
+        int[] lugares = {2, 3, 0, 1};
+        assertArrayEquals(new int[] {2, 3, 0, 1, 2}, TspFuerzaBruta.resolver(matriz, lugares).recorrido());
+        assertArrayEquals(new int[] {2, 3, 0, 1, 2}, VecinoMasCercano.resolver(matriz, lugares).recorrido());
+        assertArrayEquals(new int[] {2, 1, 0, 3, 2}, HeldKarp.resolver(matriz, lugares).recorrido());
+        for (var m : todos()) {
+            assertEquals(4, m.metodo().resolver(matriz, lugares).costoS());
+            assertEquals(0, m.metodo().resolver(new double[4][4], lugares).costoS());
+        }
+        assertArrayEquals(new int[] {2, 3, 0, 1}, lugares);
+        assertArrayEquals(new double[] {0, 1, 1, 1}, matriz[0]);
+    }
+
+    @Test void t4k_oraculoEnumeracionSinIntercambios() {
+        Random azar = new Random(2026);
+        for (int caso = 0; caso < 15; caso++) {
+            double[][] matriz = matrizAlAzar(azar, 7);
+            int[] lugares = muestra(azar, 7, 6);
+            double esperado = enumerar(matriz, lugares, new boolean[6], 1, lugares[0], 0);
+            for (var m : EXACTOS) assertEquals(esperado, m.metodo().resolver(matriz, lugares).costoS(), 1e-8);
+        }
+    }
+
+    private double enumerar(double[][] matriz, int[] lugares, boolean[] usados, int nivel, int actual, double costo) {
+        if (nivel == lugares.length) return costo + matriz[actual][lugares[0]];
+        double mejor = Double.POSITIVE_INFINITY;
+        for (int i = 1; i < lugares.length; i++) if (!usados[i]) {
+            usados[i] = true;
+            mejor = Math.min(mejor, enumerar(matriz, lugares, usados, nivel + 1, lugares[i],
+                    costo + matriz[actual][lugares[i]]));
+            usados[i] = false;
+        }
+        return mejor;
+    }
 
     private static final double TOL = 1e-9;
 
@@ -81,7 +149,7 @@ class TspTest {
 
     @Test
     void t4e_lugaresNoConsecutivos() {
-        double[][] m = matrizAlAzar(new Random(5), 8);
+        double[][] m = matrizAlAzar(new Random(2026), 8);
         int[] lugares = {5, 2, 7, 0};
         ResultadoTsp bf = TspFuerzaBruta.resolver(m, lugares);
         ResultadoTsp hk = HeldKarp.resolver(m, lugares);

@@ -3,7 +3,7 @@
 Estado: implementado, verificado y experimentado; análisis y figura disponibles (2026-11-12).
 Mejora experimental: figura logarítmica, terminología del enunciado y normalización
 T/(k·V) generada desde CSV, con discusión de inicialización y límites de inferencia.
-Responsable: _(asignar)_ · Peso: 20 %.
+Peso: 20 %.
 
 Evidencia actual: 20 pares con cola, 10 también con lineal, 30 mediciones completadas
 con cinco repeticiones. Diez comparaciones Java entre versiones, treinta resultados

@@ -63,7 +63,27 @@ La instalación de dependencias también requiere internet.
 
 ### Pruebas de infraestructura y pruebas de algoritmos
 
-**Actualización 2026-11-12 (bloque R3):** QuickHull Java propio, verificación y medición
+**Actualización 2026-11-12 (bloque R4):** algoritmos TSP, experimentos e itinerario
+completos. Java 107/107 y Python 176/176; no hay pruebas fallidas ni omitidas.
+Ambos exactos completan k=5..12 con costos coincidentes. Fuerza bruta k=12 conserva
+una ejecución por superar 60 s; las demás series conservan cinco repeticiones.
+Resultados, calidad de la heurística e itinerario en `results/r4/`; figura en
+`results/figuras/r4_tiempo_vs_k.png` y análisis en el capítulo 5 del documento técnico.
+R5 sigue pendiente. Las cifras de los bloques anteriores se conservan como historial.
+
+Reproducir R4 desde la raíz (requiere catálogo y matriz R2 ya verificada):
+
+```powershell
+.\gradlew.bat bootRun --args=r4 --console=plain
+cd python
+.\.venv\Scripts\python.exe -m preparacion graficas
+cd ..
+```
+
+El comando R4 registra su entorno en `results/r4/maquina_java.csv`, sin reemplazar el
+de otros bloques. Evitar pruebas y otras cargas pesadas durante las mediciones.
+
+**Cierre 2026-11-12 (bloque R3, histórico):** QuickHull Java propio, verificación y medición
 SciPy completadas. Python 166/166; Java completo 86/93 aprobadas, con 7 fallos de TSP
 por R4 pendiente. Arquitectura y R1–R3 pasan. Las actualizaciones siguientes son históricas.
 

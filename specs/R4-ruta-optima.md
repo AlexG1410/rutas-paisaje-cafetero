@@ -1,9 +1,9 @@
 # R4 — Ruta óptima de recorrido (viajante asimétrico)
 
-Estado: algoritmos, itinerario, integración experimental y gráficas implementados y
-verificados con pruebas (2026-11-12). Pendientes: mediciones reales, análisis de sus
-resultados y cierre de documentación/guía de sustentación; no se declara R4 completo.
-Responsable: _(asignar)_ · Peso: 25 %.
+Estado: implementada, verificada, medida y documentada (2026-11-12).
+Ocho tamaños exactos con costos coincidentes, veinte instancias de calidad e itinerario
+final de siete atractivos dentro de 660 min. Evidencia en `results/r4/` y capítulo 5.
+Peso: 25 %.
 
 ## Decisiones y precisiones del bloque aprobado
 
@@ -134,7 +134,7 @@ itinerario: `service.ItinerarioService` (también lo usa la app).
 4. k = 0 → `{p, p}`, costo 0. k = 1 → `{p, a, p}`.
 
 ### R4.2 Heurística voraz
-Recomendación inicial: **vecino más cercano** (desde el lugar actual, ir al no visitado con
+Heurística confirmada: **vecino más cercano** (desde el lugar actual, ir al no visitado con
 menor `M[actual][j]`; empate → el que aparece primero en `lugares`; al final regresar).
 Justificar la elección en el documento con los elementos voraces de la guía 08.
 
@@ -188,24 +188,27 @@ elección voraz + subestructura óptima, guía 08 sección 6) y aquí no.
 
 ## Criterios de aceptación
 
-- [ ] T4-* en verde (`TspTest`).
-- [ ] Fuerza bruta y Held-Karp dan el mismo costo óptimo en todos los k que la fuerza bruta
+- [x] T4-* en verde (`TspTest`).
+- [x] Fuerza bruta y Held-Karp dan el mismo costo óptimo en todos los k que la fuerza bruta
       resuelve (columna `coinciden`).
-- [ ] Tabla y figura tiempo vs k (5..12) para ambos; mayor k resuelto por cada uno;
+- [x] Tabla y figura tiempo vs k (5..12) para ambos; mayor k resuelto por cada uno;
       "no completada" si pasa de 5 min (`Medidor.medirConLimite`).
-- [ ] Memoria de Held-Karp: entradas de la tabla y bytes estimados por k (y opcionalmente
+- [x] Memoria de Held-Karp: entradas de la tabla y bytes estimados por k (y opcionalmente
       la memoria medida de la JVM, en una ejecución aparte de la de tiempo).
-- [ ] Tabla de calidad de la heurística; itinerario con totales; contraejemplo voraz.
+- [x] Tabla de calidad de la heurística; itinerario con totales; contraejemplo voraz.
 
 ## Análisis teórico (va al documento técnico)
 
 - Fuerza bruta: Θ(k!) recorridos, Θ(k·k!) operaciones si cada costo se calcula de nuevo;
   memoria O(k).
 - Held-Karp: Θ(k² · 2^k) tiempo, Θ(k · 2^k) memoria (dp + predecesores); recurrencia de
-  arriba; fuente: Held y Karp (1962) y la guía 09.
+  arriba; fuente consultada: guía 09, sección 9, Universidad del Quindío (2026).
+  Conteo ajustado a esta implementación en el capítulo 5. El artículo de 1962 sigue
+  como candidato no verificado en `docs/fuentes.md`; no se cita como original leído.
 - Vecino más cercano: Θ(k²) tiempo, O(k) memoria; sin garantía de optimalidad.
-- Comparar con lo medido: el cociente t(k+1)/t(k) debería acercarse a (k+1) en fuerza bruta
-  y a ≈ 2·((k+1)/k)² en Held-Karp.
+- Comparar con lo medido: modelos de cociente t(k+1)/t(k): (k+1)²/k en fuerza bruta
+  con costo completo por hoja y 2·((k+1)/k)² en Held-Karp. No se exige coincidencia
+  numérica ni monotonía en cada par de la serie finita; discutir las desviaciones.
 
 ## Experimento
 

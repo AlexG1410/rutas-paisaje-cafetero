@@ -1,7 +1,7 @@
 # R1 — Modelo de la red vial
 
 Estado (2026-11-12): R1.1–R1.5 implementados y experimento R1.3 ejecutado;
-documentación y figura disponibles, en revisión de cierre. Responsable: _(asignar)_ · Peso: 15 %.
+documentación y figura disponibles, en revisión de cierre. Peso: 15 %.
 
 - Red descargada: 8877 nodos/20245 aristas; componente exportada: 8791/20132;
   grafo Java sin paralelas redundantes: 8791/19997.

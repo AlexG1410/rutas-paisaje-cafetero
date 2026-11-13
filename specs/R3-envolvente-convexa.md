@@ -1,7 +1,7 @@
 # R3 — Envolvente convexa de la red vial
 
 Estado: implementado, verificado y experimentado; documento y figura disponibles (2026-11-12).
-Responsable: _(asignar)_ · Peso: 20 %.
+Peso: 20 %.
 
 Mejora documental aprobada (2026-11-12): discusión más directa, normalización por
 punto y revisión del promedio. `graficas` genera `results/r3/tiempo_por_punto.csv`

@@ -47,6 +47,16 @@ sección). Al verificarla, marcar `[x]` y anotar exactamente qué se usó.
       visualizing complex street networks. *Computers, Environment and Urban Systems, 65*,
       126–139. — R1.
 - [ ] Guías del curso 02–09 (docente de Análisis de Algoritmos, U. del Quindío, 2026-2).
+      Consultas específicas verificadas para R4 (2026-11-12):
+      - [x] Universidad del Quindío (2026). Guía 08, *Algoritmos voraces*, sección 1
+        (elementos), sección 5 (Dijkstra, distancia acumulada) y sección 6 (elección
+        voraz y subestructura óptima). Copia local en `docs/guias/`; se usa en §5.6 y
+        §5.9. La prueba de seguridad de Dijkstra también se apoya en Sedgewick y Wayne.
+      - [x] Universidad del Quindío (2026). Guía 09, *Programación dinámica*, sección 9,
+        diapositivas 29–32: matriz de costo óptimo 80, estado por subconjuntos, cierre
+        del ciclo y complejidad Held-Karp. Se adapta a k visitas con partida implícita;
+        el conteo de permutaciones dirigidas, operaciones y memoria propios se deriva
+        en §5.2–5.3. No se divide por dos al tratar una matriz asimétrica.
 
 ## Documentación técnica (citar con enlace y versión)
 - [x] SciPy, documentación ConvexHull (página 1.18.0, instalación local 1.18.1):

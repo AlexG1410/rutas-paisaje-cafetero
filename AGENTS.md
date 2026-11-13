@@ -225,7 +225,7 @@ Orden completo para reproducir: ver `README.md`.
 | Dijkstra con cola | `PriorityQueue` con borrado perezoso | tomada |
 | Experimento R2 | 10 pares intramunicipales + 10 intermunicipales reproducibles; ambas versiones incluyen reconstrucción; matriz Java de segundos a 3 decimales | tomada (2026-11-12, D13) |
 | Envolvente | QuickHull 2D propio, sin ordenar; particiones por rangos y giros long exactos | tomada (R3, 2026-11-12, D6) |
-| Heurística R4 | Vecino más cercano | propuesta — confirmar en R4 |
+| Heurística R4 | Vecino más cercano; retiro por mayor reducción de jornada recalculada con Held-Karp | tomada (R4, 2026-11-12, D7) |
 | Velocidades sin `maxspeed` | Promedio por tipo con OSMnx; respaldo promedio entre tipos con datos; límites múltiples por mínimo | tomada (R1.2); detalle en spec |
 | `retain_all` en descargas | `True`; `drive`, `simplify=True`, GraphML reutilizable con metadatos; redes R1.3 de 2/5/10/20 km con `dist_type="bbox"` centradas en `cab_armenia` | tomada (departamento 2026-11-10; bbox R1.3 aprobado 2026-11-11, D12) |
 | App | REST + página estática con Leaflet | tomada |

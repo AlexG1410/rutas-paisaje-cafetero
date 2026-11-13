@@ -19,14 +19,23 @@ sección para cada una de las tres partes.
 
 ## Flujo de trabajo por requerimiento
 
-### Estado actual del bloque R3 (2026-11-12)
+### Estado actual: cierre del bloque R4 (2026-11-12)
+
+Algoritmos TSP propios, itinerario y experimentos completos. Ambos exactos resuelven
+k=5..12 con costos coincidentes, sin timeout. Fuerza bruta k=12 supera 60 s y conserva
+una sola ejecución; las otras series tienen cinco repeticiones. Veinte instancias de
+calidad y un itinerario de siete atractivos con jornada de 602,326 min. CSV, figura,
+capítulo 5 y guía personal disponibles. Pruebas: Java 107/107 y Python 176/176.
+R5 sigue pendiente; los estados y conteos siguientes son históricos.
+
+### Cierre del bloque R3 (histórico, 2026-11-12)
 
 QuickHull propio, pruebas, exportación para R5, cuatro conjuntos verificados/medidos
 contra SciPy, figura y documento disponibles. Python 166/166; suite Java completa
 86/93 aprobadas, con 7 fallos por R4 pendiente. R1–R3 y arquitectura pasan. Las líneas
 base de R2 y del entorno que siguen son históricas, no el estado actual.
 
-### Estado actual del bloque R2 (2026-11-12)
+### Cierre del bloque R2 (histórico, 2026-11-12)
 
 Implementación Java, pruebas, 30 consultas medidas, matriz 40×40, verificación NetworkX
 (30 rutas/costos y 1600 celdas), figura y análisis disponibles. Python 142/142; suite
@@ -98,7 +107,7 @@ Al terminar cada paso se actualiza el campo **Estado** de la spec:
 
 ```markdown
 # Rx.y — Nombre
-Estado: borrador · Responsable: <integrante>
+Estado: borrador
 
 ## Objetivo
 (qué pide el enunciado, citado o parafraseado)

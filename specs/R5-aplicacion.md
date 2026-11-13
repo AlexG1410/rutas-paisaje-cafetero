@@ -1,6 +1,6 @@
 # R5 — Aplicación demostrativa
 
-Estado: borrador · Responsable: _(asignar)_ · Peso: 5 % · Paquetes reorganizados: 2026-11-10 (sin cambio funcional)
+Estado: borrador · Peso: 5 % · Paquetes reorganizados: 2026-11-10 (sin cambio funcional)
 
 ## Objetivo
 

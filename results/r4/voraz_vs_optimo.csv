@@ -1,0 +1,3 @@
+caso,k,costo_optimo_s,costo_voraz_s,brecha_pct,recorrido_optimo,recorrido_voraz
+T4-b,3,18.0,23.0,27.77777777777778,A;C;D;B;A,A;D;C;B;A
+real_k5_1,5,13705.470999999998,13764.125,0.4279604838097303,cab_armenia;fh_decameron_panaca;fh_las_camelias;fh_mirador_palmas;atr_centro_guadua;atr_penas_blancas;cab_armenia,cab_armenia;atr_penas_blancas;atr_centro_guadua;fh_mirador_palmas;fh_las_camelias;fh_decameron_panaca;cab_armenia

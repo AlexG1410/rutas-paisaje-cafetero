@@ -59,9 +59,18 @@ también la tabla de la sección 10 de `AGENTS.md`.
   perturbar coordenadas para hacer coincidir resultados. El mapa conserva lat/lon
   del primer nodo original asociado a cada punto redondeado.
 
-## D7. Heurística: vecino más cercano — propuesta
-- Voraz clásica, Θ(k²), fácil de justificar con los elementos voraces de la guía 08.
-  Contraejemplo conocido (T4-b) para R4.5.
+## D7. Heurística: vecino más cercano — tomada (bloque R4 aprobado, 2026-11-12)
+- Selecciona el menor tiempo dirigido M[actual][j] entre destinos pendientes;
+  desempata por orden de entrada. Θ(k²), O(k) memoria, sin simetrizar la matriz.
+  Se elige como referencia determinista, económica y fácil de interpretar, no por
+  una garantía de óptimo. Calidad frente a Held-Karp en veinte selecciones reproducibles.
+- Contraejemplo T4-b: exacto 18 frente a voraz 23; se conserva también el primer
+  contraejemplo real de calidad. No confundir esta selección con la menor distancia
+  acumulada desde el origen que usa Dijkstra.
+- Itinerario: ocho atractivos iniciales desde Armenia fijados en la spec. Si supera
+  660 min, retirar el que más reduce la jornada recalculada con Held-Karp; empate por
+  orden vigente. Política local, no optimización del interés turístico. No alterar
+  coordenadas ni alertas geométricas para lograr una jornada factible.
 
 ## D8. Velocidades de tramos sin `maxspeed` — tomada (2026-11-10)
 - Aprobada la imputación con `ox.routing.add_edge_speeds`: promedio de límites conocidos

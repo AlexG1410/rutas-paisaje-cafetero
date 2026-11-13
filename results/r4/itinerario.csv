@@ -1,0 +1,9 @@
+orden,id_lugar,lugar,desplazamiento_min,visita_min,tiempo_acumulado_h
+1,atr_parque_vida,Parque de la Vida,4.943866666666667,60.0,1.0823977777777778
+2,atr_museo_oro_quimbaya,Museo del Oro Quimbaya,6.080216666666667,90.0,2.683734722222222
+3,atr_colina_iluminada,Mirador Colina Iluminada,37.63368333333334,45.0,4.060962777777778
+4,atr_bejuco_canasto,Centro de Interpretación Del Bejuco al Canasto,2.0831166666666667,45.0,4.845681388888889
+5,atr_calle_real,Calle Real,32.57393333333333,45.0,6.138580277777778
+6,atr_alto_cruz,Mirador Alto de la Cruz,0.8646499999999999,60.0,7.152991111111111
+7,atr_jardin_botanico,Jardín Botánico del Quindío,40.93051666666667,120.0,9.835166388888888
+8,cab_armenia,Armenia (Plaza de Bolívar),12.215766666666667,0.0,10.038762499999999

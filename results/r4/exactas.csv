@@ -1,0 +1,9 @@
+k,tiempo_fuerza_bruta_ms,estado_fuerza_bruta,tiempo_held_karp_ms,estado_held_karp,costo_fuerza_bruta_s,costo_held_karp_s,coinciden,repeticiones_fuerza_bruta,repeticiones_held_karp,semilla,fase_fuerza_bruta,fase_held_karp
+5,0.079,completada,0.0467,completada,13486.922999999999,13486.922999999999,true,5,5,2031,medicion,medicion
+6,0.1244,completada,0.0683,completada,15494.77,15494.77,true,5,5,2032,medicion,medicion
+7,0.1992,completada,0.1723,completada,21368.896000000004,21368.896000000004,true,5,5,2033,medicion,medicion
+8,1.5439,completada,0.6266,completada,13161.627,13161.627,true,5,5,2034,medicion,medicion
+9,7.8231,completada,0.4642,completada,19059.988999999998,19059.988999999998,true,5,5,2035,medicion,medicion
+10,97.1198,completada,1.0705,completada,22839.577,22839.577,true,5,5,2036,medicion,medicion
+11,4821.8283,completada,1.2904,completada,24347.894,24347.894,true,5,5,2037,medicion,medicion
+12,60136.2287,completada,4.5275,completada,20434.248,20434.248,true,1,5,2038,medicion,medicion

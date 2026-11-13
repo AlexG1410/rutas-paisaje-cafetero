@@ -10,11 +10,12 @@
 <body>
 <header>
   <h1>Rutas del Paisaje Cultural Cafetero</h1>
-  <nav>
-    <button class="pestana activa" data-panel="ruta">Ruta origen–destino</button>
-    <button class="pestana" data-panel="envolvente">Envolvente convexa</button>
-    <button class="pestana" data-panel="itinerario">Itinerario de un día</button>
-    <button class="pestana" data-panel="resultados">Resultados R1–R4</button>
+  <p>Red vial del Quindío · Algoritmos propios en Java</p>
+  <nav aria-label="Funciones de la aplicación" role="tablist">
+    <button class="pestana activa" role="tab" aria-selected="true" data-panel="ruta">Ruta origen–destino</button>
+    <button class="pestana" role="tab" aria-selected="false" data-panel="envolvente">Envolvente convexa</button>
+    <button class="pestana" role="tab" aria-selected="false" data-panel="itinerario">Itinerario de un día</button>
+    <button class="pestana" role="tab" aria-selected="false" data-panel="resultados">Resultados R1–R4</button>
   </nav>
 </header>
 
@@ -23,21 +24,27 @@
     <section id="panel-ruta" class="panel">
       <label>Origen <select id="origen"></select></label>
       <label>Destino <select id="destino"></select></label>
-      <button id="calcular-ruta">Calcular ruta (Dijkstra con cola)</button>
-      <p id="info-ruta" class="info"></p>
+      <button id="calcular-ruta" disabled>Calcular ruta (Dijkstra con cola)</button>
+      <p id="info-ruta" class="info" aria-live="polite"></p>
     </section>
 
     <section id="panel-envolvente" class="panel oculto">
       <button id="ver-envolvente">Dibujar envolvente de la red</button>
-      <p id="info-envolvente" class="info"></p>
+      <p id="info-envolvente" class="info" aria-live="polite"></p>
     </section>
 
     <section id="panel-itinerario" class="panel oculto">
       <label>Partida <select id="partida"></select></label>
       <p>Atractivos (entre 6 y 8):</p>
-      <div id="lista-atractivos"></div>
-      <button id="calcular-itinerario">Comparar Held-Karp y heurística</button>
-      <div id="info-itinerario" class="info"></div>
+      <p id="contador-atractivos" aria-live="polite"></p>
+      <details>
+        <summary>Elegir o cambiar atractivos</summary>
+        <div id="lista-atractivos"></div>
+      </details>
+      <button id="calcular-itinerario" disabled>Comparar Held-Karp y heurística</button>
+      <p class="nota">Se conserva tu selección en ambos métodos. No se retiran atractivos automáticamente.
+        La jornada incluye visitas y regreso, sin horarios de apertura, comidas ni tráfico real.</p>
+      <div id="info-itinerario" class="info" aria-live="polite"></div>
     </section>
 
     <section id="panel-resultados" class="panel oculto">
@@ -45,19 +52,38 @@
         <select id="tabla">
           <option>r1/tamano_red.csv</option>
           <option>r1/tiempo_componente.csv</option>
+          <option>r1/memoria_representacion.csv</option>
+          <option>r1/lugares_lejanos.csv</option>
           <option>r2/cociente.csv</option>
+          <option>r2/mediciones_dijkstra.csv</option>
+          <option>r2/normalizacion_lineal.csv</option>
+          <option>r2/verificacion_networkx.csv</option>
           <option>r3/envolvente.csv</option>
+          <option>r3/tiempo_por_punto.csv</option>
           <option>r4/exactas.csv</option>
+          <option>r4/memoria_held_karp.csv</option>
           <option>r4/calidad_heuristica.csv</option>
+          <option>r4/calidad_detalle.csv</option>
           <option>r4/itinerario.csv</option>
+          <option>r4/itinerario_resumen.csv</option>
+          <option>r4/retiros.csv</option>
+          <option>r4/voraz_vs_optimo.csv</option>
+          <option>r4/cocientes_tiempos.csv</option>
         </select>
       </label>
       <button id="ver-tabla">Ver tabla</button>
-      <div id="contenido-tabla" class="info"></div>
+      <div id="contenido-tabla" class="info" aria-live="polite"></div>
       <div id="figuras"></div>
     </section>
   </div>
-  <div id="mapa"></div>
+  <section id="zona-mapa" aria-label="Mapa de recorridos">
+    <p id="aviso-mapa" class="advertencia" role="status"></p>
+    <div id="mapa"></div>
+    <p id="leyenda" aria-live="polite"></p>
+    <p class="nota">Los caminos siguen nodos de la red dirigida, unidos por segmentos: no se conserva toda
+      la curvatura de las carreteras. Los extremos son nodos viales asociados, no accesos exactos a cada lugar.
+      Las alertas de asociación de R1 pueden consultarse en Resultados. Mapa base: requiere internet.</p>
+  </section>
 </main>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>

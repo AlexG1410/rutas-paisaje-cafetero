@@ -28,7 +28,7 @@ public class ConsultaResultadosService {
 
     /** Tabla de results/ (p. ej. "r2/cociente.csv"). */
     public List<Map<String, String>> tabla(String nombre) {
-        if (!nombre.matches("r[1-4]/[A-Za-z0-9_\\-]+\\.csv")) {
+        if (nombre == null || !nombre.matches("r[1-4]/[A-Za-z0-9_\\-]+\\.csv")) {
             throw new IllegalArgumentException("Nombre de resultado no válido: " + nombre);
         }
         if (!resultados.existe(nombre)) {
@@ -43,6 +43,12 @@ public class ConsultaResultadosService {
     }
 
     public byte[] figura(String nombre) {
+        if (nombre == null || !nombre.matches("[A-Za-z0-9_\\-]+\\.png")) {
+            throw new IllegalArgumentException("Nombre de figura no válido: " + nombre);
+        }
+        if (!resultados.existe("figuras/" + nombre)) {
+            throw new NoSuchElementException("Falta la figura. Se genera con: python -m preparacion graficas");
+        }
         return resultados.figura(nombre);
     }
 

@@ -26,6 +26,7 @@ public class ItinerarioController {
 
     @PostMapping("/itinerario")
     public ComparacionItinerario itinerario(@RequestBody SolicitudItinerario solicitud) {
+        if (solicitud == null) throw new IllegalArgumentException("Indique partida y entre 6 y 8 atractivos");
         List<String> atractivos = solicitud.atractivos() == null ? List.of() : solicitud.atractivos();
         if (atractivos.size() < Constantes.ATRACTIVOS_MIN
                 || atractivos.size() > Constantes.ATRACTIVOS_MAX) {

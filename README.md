@@ -63,7 +63,13 @@ La instalación de dependencias también requiere internet.
 
 ### Pruebas de infraestructura y pruebas de algoritmos
 
-**Actualización 2026-11-12 (bloque R4):** algoritmos TSP, experimentos e itinerario
+**Actualización 2026-11-12 (R5):** aplicación local operativa y probada: rutas en vivo,
+envolvente, comparación de itinerarios y resultados. Java 118/118, Python 176/176;
+prueba de navegador con Edge aprobada sobre datos reales. Los pasos de uso están en
+[Aplicación (R5)](#aplicación-r5). Pendiente: comprobación desde cero en otro equipo
+y revisión integral de entrega. Las actualizaciones siguientes son históricas.
+
+**Cierre 2026-11-12 (bloque R4, histórico):** algoritmos TSP, experimentos e itinerario
 completos. Java 107/107 y Python 176/176; no hay pruebas fallidas ni omitidas.
 Ambos exactos completan k=5..12 con costos coincidentes. Fuerza bruta k=12 conserva
 una ejecución por superar 60 s; las demás series conservan cinco repeticiones.
@@ -278,12 +284,61 @@ R1.3 ya está integrado y su primera ejecución real está verificada.
 
 ## Aplicación (R5)
 
+Con **JDK 21**, desde la raíz del repositorio:
+
 ```bash
 ./gradlew bootRun
 ```
 
-Abrir http://localhost:8080: ruta origen–destino, envolvente convexa, itinerario de un día
-(Held-Karp frente a la heurística) y resultados R1–R4.
+En Windows: `.\gradlew.bat bootRun --console=plain`. Dejar esa terminal abierta y abrir
+http://localhost:8080 en el navegador. Para terminar, pulsar `Ctrl+C` en la terminal.
+No pasar `--args=rN`: esos comandos ejecutan experimentos y terminan sin servidor web.
+
+**Datos:** el catálogo, `data/processed/` y los resultados están versionados, de modo que
+una copia completa del repositorio permite usar la app sin instalar Python ni descargar
+otra red. La primera compilación requiere internet para Gradle; el mapa usa Leaflet y
+teselas OpenStreetMap desde internet. Sin mapa, las consultas y tablas siguen disponibles.
+Si faltan datos locales, seguir los comandos de [Reproducir los resultados](#reproducir-los-resultados);
+el mensaje de error indica el bloque correspondiente. No repetir experimentos solo para
+abrir la aplicación. Si el puerto 8080 está ocupado, detener la instancia anterior o usar
+`bootRun --args='--server.port=8081'` y abrir el puerto elegido.
+
+### Cómo usarla
+
+1. **Ruta origen–destino:** elegir dos lugares y pulsar Calcular ruta. Dijkstra se ejecuta
+   en el servidor; aparecen minutos estimados, nodos explorados y el camino dirigido.
+2. **Envolvente convexa:** pulsar Dibujar envolvente. Se muestra el resultado verificado
+   de R3; no es el límite administrativo del Quindío.
+3. **Itinerario:** elegir partida y desplegar Elegir o cambiar atractivos para seleccionar
+   entre 6 y 8. Se precargan los siete del itinerario final R4. Comparar muestra Held-Karp
+   y vecino más cercano, visitas, desplazamientos, jornada y diferencia. Verde continuo:
+   exacto; rojo discontinuo: heurística. Los caminos pueden superponerse.
+   Una jornada superior a 11 horas muestra aviso, pero no elimina lugares automáticamente.
+   Los retiros del ejemplo R4 están en Resultados (`r4/retiros.csv`).
+4. **Resultados:** elegir una tabla y pulsar Ver tabla; desplazar horizontalmente si es
+   ancha. Debajo se muestran las figuras de R1–R4. Esta función solo consulta archivos.
+
+Los extremos son nodos viales asociados a lugares, sin tramos artificiales de acceso.
+La representación une los nodos del camino; no conserva todas las curvas de las aristas.
+Los tiempos no incluyen tráfico real, comidas, horarios ni acceso exacto al establecimiento.
+Se conservan las alertas de R1, visibles en `r1/lugares_lejanos.csv`.
+
+### Verificación de R5 (desarrollo)
+
+`gradlew.bat test` incluye pruebas HTTP con puerto aleatorio y datos sintéticos, sin
+necesitar iniciar el servidor por separado. Para repetir la prueba de interfaz con datos
+reales en Windows, iniciar la app y, en otra terminal, ejecutar:
+
+```powershell
+node src/test/javascript/r5-browser.cjs
+```
+
+Solo esta prueba opcional requiere Node 22+ y Edge instalado. No instala paquetes npm;
+usa un perfil temporal propio y guarda capturas en `build/r5/`. Puede indicarse otro
+ejecutable de Edge mediante la variable `R5_EDGE`. Verifica las cuatro funciones,
+selección inválida, aviso de 11 horas, respuestas tardías, contenido seguro, vista móvil
+y fallo de Leaflet. Las capturas revisadas acompañan el capítulo 6 del documento.
+La verificación desde cero en una segunda máquina sigue pendiente.
 
 ## Estructura
 

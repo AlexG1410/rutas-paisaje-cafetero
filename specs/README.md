@@ -19,7 +19,16 @@ sección para cada una de las tres partes.
 
 ## Flujo de trabajo por requerimiento
 
-### Estado actual: cierre del bloque R4 (2026-11-12)
+### Estado actual: R5 implementada y verificada localmente (2026-11-12)
+
+Aplicación REST + Leaflet con rutas Dijkstra en vivo, envolvente R3, comparación de
+itinerarios con caminos viales y tablas/figuras. Java 118/118 (incluye HTTP real sobre
+datos sintéticos) y Python 176/176. Edge headless verifica las cuatro funciones con
+datos reales y casos de error/móvil/CDN; capturas en el capítulo 6. R1–R4 intactos.
+Pendiente de entrega: reproducir README en otra máquina limpia y revisión integral
+del documento. Las líneas base que siguen son históricas.
+
+### Cierre del bloque R4 (histórico, 2026-11-12)
 
 Algoritmos TSP propios, itinerario y experimentos completos. Ambos exactos resuelven
 k=5..12 con costos coincidentes, sin timeout. Fuerza bruta k=12 supera 60 s y conserva

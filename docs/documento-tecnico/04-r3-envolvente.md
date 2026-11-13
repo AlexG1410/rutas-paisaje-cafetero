@@ -16,8 +16,7 @@ enteras de 64 bits; el producto cruz permite decidir giros sin tolerancias flota
 Un resultado positivo indica izquierda, negativo derecha y cero colinealidad.
 Las operaciones exactas de `Math` detectan un desbordamiento en lugar de ocultarlo.
 El experimento valida un rango por eje de hasta 10⁹ m: las diferencias están acotadas
-por ese rango y el valor absoluto del cruz por 2·10¹⁸, que cabe en `long`. No se
-promete procesar cualquier combinación arbitraria de valores de 64 bits.
+por ese rango y el valor absoluto del cruz por 2·10¹⁸, que cabe en `long`.
 
 Los vértices se devuelven en sentido antihorario (CCW), comenzando por el menor `(x,y)`,
 sin repetirlo al final. Un punto alineado en medio de un lado no cuenta como vértice.
@@ -29,8 +28,8 @@ colineales, los dos extremos lexicográficos. La entrada no se modifica.
 Se eligió **QuickHull 2D**, un algoritmo de divide y vencerás. La red concentra nodos
 en vías y cascos urbanos; se esperaba que muchos fueran interiores al casco. Los
 datos finales apoyan esa elección: la envolvente de 8791 puntos tiene 14 vértices
-(`results/r3/envolvente.csv`). Esto describe este conjunto, no una garantía para
-cualquier red ni una prueba de que QuickHull sea siempre la mejor alternativa.
+(`results/r3/envolvente.csv`). Con pocos vértices extremos, QuickHull puede descartar
+gran parte de los puntos interiores en los primeros niveles.
 
 1. Recorrer la entrada para encontrar los extremos lexicográficos A y B.
 2. Separar candidatos a la derecha de A→B (cadena inferior) y B→A (superior).
@@ -43,9 +42,8 @@ cualquier red ni una prueba de que QuickHull sea siempre la mejor alternativa.
    y quitar el mínimo repetido al final.
 
 Se usa una copia de referencias a los puntos y se particiona intercambiando posiciones
-dentro de rangos disjuntos. No hay ordenamiento global, listas nuevas de candidatos
-por nivel ni estructuras geométricas de terceros. La implementación es propia en
-`algorithm.EnvolventeConvexa`; `PriorityQueue` ni otras partes de R2 intervienen aquí.
+dentro de rangos disjuntos. Esto evita ordenar globalmente y crear listas de candidatos
+por nivel. La implementación está en `algorithm.EnvolventeConvexa`.
 
 **Correctitud.** Los extremos A y B pertenecen al casco. Para un segmento con candidatos
 en su lado exterior, la recta paralela que pasa por el punto más alejado es de soporte;
@@ -60,9 +58,8 @@ no vacía elimina al menos su pivote de los candidatos, por lo que la recursión
 
 ## 4.3 Recurrencia y complejidad (tiempo y memoria, con fuente)
 
-La idea se identifica como QuickHull en el manual de Qhull y en la referencia de
-Barber, Dobkin y Huhdanpaa (1996). Las siguientes cotas se derivan de **esta variante**,
-no se copian de las estructuras internas de Qhull.
+La idea corresponde a QuickHull (Barber, Dobkin y Huhdanpaa, 1996; manual de Qhull).
+Las cotas siguientes se derivan de los barridos y particiones de nuestra variante 2D.
 
 Para m candidatos de un subproblema, buscar pivote y hacer las dos particiones exige
 un número constante de barridos. Con constantes positivas c y d:
@@ -90,26 +87,27 @@ Una cota sensible a la salida es O(n·h): los rangos de un mismo nivel son disju
 y suman a lo más n candidatos; cada llamada no vacía incorpora un vértice extremo
 distinto, de modo que hay O(h) niveles como máximo. Por tanto, para una distribución
 de entradas de tamaño n, tomar esperanza da `E[T] ≤ C·n·E[h]+C'·n`. Para n≥1, h≥1,
-esto es O(n·E[h]) y, usando h≤n, O(n²). Esta cota promedio es general pero puede ser
-holgada; no se ha demostrado aquí una ley para E[h] ni una cota esperada ajustada
-para muestras uniformes en el cuadrado. Un único conjunto por tamaño no la estima.
+esto es O(n·E[h]) y, usando h≤n, O(n²).
+
+Para un modelo con E[h]=O(log n), la misma derivación da E[T]=O(n log n), sin
+necesitar particiones equilibradas. La revisión bibliográfica del modelo uniforme
+continuo en un cuadrado queda identificada en `docs/fuentes.md` como pendiente de
+consulta del artículo original de Rényi y Sulanke. El generador del experimento usa
+una cuadrícula entera fija; su distribución se distingue de ese modelo continuo.
 
 La aritmética es sobre `long` de tamaño fijo y cada giro cuesta O(1) en ese modelo.
 La copia ocupa O(n), la salida O(h), y cada llamada mantiene solo índices, puntos y
 valores escalares. Si la profundidad es D, la pila ocupa O(D): típicamente logarítmica
 en el modelo equilibrado, pero O(n) como límite general. Memoria total
-`O(n+h+D)=O(n)` porque h,D≤n (con casos pequeños constantes). La pila forma parte de
-esa cota; `-Xss16m` es una configuración experimental, no una garantía de soportar
-recursiones arbitrariamente profundas. Para datos adversarios fuera de los conjuntos
-requeridos habría que revisar el riesgo de agotar la pila.
+`O(n+h+D)=O(n)` porque h,D≤n (con casos pequeños constantes). Se configura `-Xss16m`;
+las entradas adversarias con profundidad lineal pueden agotar la pila disponible.
 
 ## 4.4 Verificación contra SciPy
 
 JUnit comprueba giros, cuadrado con colineales, triángulo con puntos interiores,
 degenerados, duplicados, empates, segmentos verticales, entrada intacta y errores
 numéricos. Nubes aleatorias y puntos próximos a una circunferencia se contrastan
-con una cadena monótona independiente de Andrew implementada solo como oráculo
-de pruebas; no es el algoritmo de producción.
+con una cadena monótona independiente de Andrew como oráculo de pruebas.
 
 El servicio verifica **todos** los conjuntos antes de medir: pertenencia y unicidad
 de vértices, mínimo primero, giros estrictos CCW y todos los puntos en el semiplano
@@ -117,16 +115,14 @@ interior de cada lado. Este certificado geométrico O(n·h) está fuera del relo
 cada serie completada se exige exactamente la misma lista que en la verificación previa.
 
 Java exporta puntos y vértices en `results/r3/`. Python construye un arreglo NumPy
-float64 con esos mismos puntos y usa `scipy.spatial.ConvexHull`, sin descargar datos
-ni producir el casco del proyecto. Antes de medir SciPy se verifican los cuatro
-conjuntos completos. SciPy devuelve CCW en 2D; se rota su lista al mínimo y se compara
-con la lista Java. Así se comprueban tanto vértices como orden canónico, sin cambiar
-el resultado Java para ajustarlo a la librería. También se verifica la salida medida.
+float64 con esos mismos puntos y usa `scipy.spatial.ConvexHull` como referencia.
+Antes de medir SciPy se verifican los cuatro conjuntos completos. SciPy devuelve
+CCW en 2D; se rota su lista al mínimo y se compara con la lista Java. La comparación
+comprueba vértices y orden canónico, también después de cada serie medida.
 
 Los cuatro casos coinciden (`coinciden=True` en `envolvente.csv`), sin usar `QJ` ni
-perturbar coordenadas. Los conjuntos del experimento son no colineales; los degenerados
-del contrato propio se cubren con pruebas Java. Si Qhull informa un problema de
-precisión o degeneración, se aborta y se investiga, no se alteran los puntos.
+perturbar coordenadas. Los conjuntos del experimento son no colineales; los casos
+degenerados se cubren con pruebas Java. Cualquier discrepancia aborta el experimento.
 
 `envolvente_red.csv` conserva orden, punto UTM redondeado, índice del primer nodo que
 lo produjo y lat/lon originales para R5. Son coordenadas del nodo asociado, no la
@@ -142,7 +138,7 @@ La red también conservó sus 8791 puntos distintos después del redondeo.
 
 Se ejecutaron `bootRun --args=maquina`, `bootRun --args=r3`, `envolvente-scipy` y
 `graficas` el 2026-11-12. Se usaron una JVM hija por conjunto para Java y un proceso
-spawn por conjunto para SciPy, sin ejecutar pruebas simultáneamente. Cada método
+spawn por conjunto para SciPy. Cada método
 hizo un calentamiento y cinco repeticiones; se presenta la mediana. No hubo timeout
 ni ejecución >60 s. Lectura, redondeo, deduplicación, construcción del arreglo NumPy,
 serialización, arranque, GC y verificación quedaron fuera del cronómetro.
@@ -150,7 +146,7 @@ serialización, arranque, GC y verificación quedaron fuera del cronómetro.
 La configuración Java está en `results/maquina_java.csv`: Java 21.0.10, heap inicial
 y máximo 2 GB, sin limitar el JIT para acelerar el arranque. Python y librerías se
 registran aparte en `results/r3/maquina_python.csv`: Python 3.14.3, SciPy 1.18.1 y
-NumPy 2.5.4; no se reemplazó la evidencia Python de R1.
+NumPy 2.5.4. El procedimiento de aislamiento se detalla en el protocolo experimental.
 
 | Conjunto de puntos | n | Vértices de la envolvente | Tiempo propio (ms) | Tiempo SciPy (ms) | Cociente |
 |---|---|---|---|---|---|
@@ -162,58 +158,62 @@ NumPy 2.5.4; no se reemplazó la evidencia Python de R1.
 Fuente: `results/r3/envolvente.csv`, generada por comando a partir de mediciones;
 cuatro decimales para presentación. `cociente=tiempo_propio_ms/tiempo_scipy_ms`, calculado
 sin redondear. Un valor inferior a uno favorece al método Java en esta ejecución.
-`repeticiones` y `repeticiones_scipy` conservan por separado las cinco muestras de cada
-método. Las columnas de estado permiten distinguir un timeout sin inventar tiempo cero.
+`repeticiones` y `repeticiones_scipy` registran por separado el número de repeticiones
+de cada método; las columnas de estado identifican las series completadas.
 
 ![Tiempos de envolvente por conjunto y método](../../results/figuras/r3_tiempos.png)
 
-La figura usa categorías separadas: no une la red y los cuadrados como si solo variara n.
+La figura separa los conjuntos según su distribución y tamaño.
 
 ## 4.6 Discusión (algoritmo y lenguaje que usa SciPy internamente)
 
 **Qué ejecuta SciPy.** La documentación de `ConvexHull` indica que utiliza Qhull y
 devuelve los vértices CCW en 2D. El manual de Qhull describe una combinación del
 QuickHull bidimensional con beneath-beyond para dimensión general (Barber, Dobkin y
-Huhdanpaa, 1996, referencia verificada en el manual/README). No se trata de ejecutar
-nuestro algoritmo Java traducido a Python. El enlace `_qhull.pyx` de SciPy está escrito
-en Cython y llama a la biblioteca reentrante nativa **C**, `libqhull_r`, sobre datos
-NumPy contiguos. Qhull también ofrece una interfaz C++, pero no se infiere por ello
-que SciPy esté usando esa interfaz.
+Huhdanpaa, 1996). El enlace `_qhull.pyx` de SciPy está escrito en Cython y llama a la
+biblioteca reentrante nativa **C**, `libqhull_r`, sobre datos NumPy contiguos.
 
-**Por qué difieren los tiempos.** En esta serie Java fue más rápido en los cuatro
-conjuntos, aunque SciPy use código nativo compilado. La comparación combina algoritmos,
-representaciones, comprobaciones numéricas, interfaz y entorno de ejecución; no permite
-atribuir el resultado exclusivamente al lenguaje. Nuestra variante se especializa en
-2D y enteros exactos y produce solo la lista de vértices. `ConvexHull` construye un
-objeto con más información —facetas, vecinos, ecuaciones, área y perímetro en 2D—
-y Qhull incluye mecanismos de precisión flotante. Es trabajo distinto aunque los
-vértices coincidan. No se aisló el costo de cada componente: son posibles factores,
-no una explicación causal cuantificada.
+**Tiempo por punto.** Se normalizan las medianas como `1000·tiempo_ms/n`, en µs por
+punto. `graficas` genera estos valores en `results/r3/tiempo_por_punto.csv` a partir
+de la tabla original, sin nuevas mediciones.
 
-Los objetos `Punto` y la deduplicación se crean **antes** de medir Java; tampoco se
-cronometra crear el ndarray de entrada Python. Por tanto no es correcto explicar
-directamente estas medianas por el tiempo de convertir objetos frente a un arreglo.
-Sí se incluye en Java la copia auxiliar de referencias y la lista de salida, además
-de recorrer objetos; en SciPy se incluye construir el objeto `ConvexHull` completo.
-La disposición contigua de NumPy y la indirección de referencias Java pueden influir,
-pero no se midió separadamente su contribución. No se optimizó la representación
-para favorecer uno de los métodos después de ver los resultados.
+| Cuadrado (puntos) | Java (µs/punto) | SciPy (µs/punto) |
+|---|---|---|
+| 1000 | 0.385600 | 1.264600 |
+| 10000 | 0.160900 | 0.542320 |
+| 50000 | 0.081894 | 0.194610 |
 
-**Distribución y límites.** La red tiene 14 vértices frente a miles de puntos, coherente
-con el descarte de interiores que motivó QuickHull. Los cuadrados terminan con 17,
-22 y 33 vértices; sus tiempos no escalan simplemente con n ni demuestran la cota
-equilibrada o la cuadrática. Ningún conjunto requerido fuerza el peor caso; las
-pruebas próximas a una circunferencia verifican correctitud con muchos vértices,
-pero no son una medición del peor caso. Un calentamiento y cinco repeticiones cumplen
-el protocolo del curso, no constituyen un estudio exhaustivo del JIT o de estabilidad
-entre máquinas. No se afirma una victoria universal de Java frente a C/SciPy.
+El tiempo por punto disminuye en ambos métodos al crecer el conjunto. El patrón es
+compatible con amortizar costos fijos: en un modelo `T(n)=a+b·n`, se tendría
+`T(n)/n=a/n+b`. También pueden influir la distribución de los puntos, el número de
+vértices y el comportamiento del JIT; con tres tamaños no se separan sus efectos.
+
+**Trabajo realizado por cada método.** Nuestra variante se especializa en 2D y
+enteros exactos y devuelve una lista de vértices. SciPy prepara Qhull y construye un
+objeto `ConvexHull` con facetas, vecinos, ecuaciones, área y perímetro en 2D, además
+de emplear los mecanismos de precisión flotante de Qhull. Este trabajo adicional
+ofrece una explicación plausible de parte de la diferencia observada. Su costo fijo
+y su costo dependiente de n no se midieron por separado.
+
+Los objetos `Punto` y el ndarray de entrada se preparan fuera del reloj. La medición
+Java incluye la copia auxiliar y la lista de salida; la de SciPy, la llamada completa
+a `ConvexHull`. Así, los resultados comparan dos implementaciones y salidas concretas,
+además de sus lenguajes y representaciones.
+
+Java fue más rápido en los cuatro conjuntos de esta serie. En los cuadrados, el
+cociente propio/SciPy fue 0.305, 0.297 y 0.421: la ventaja relativa fue mayor en los
+dos primeros tamaños y menor en el último, con una evolución no monótona.
+
+**Alcance.** La red tiene 14 vértices y los cuadrados 17, 22 y 33, coherentes con el
+descarte de interiores que motivó QuickHull. Se dispone de una muestra por tamaño y
+cinco repeticiones temporales por método. Estos conjuntos evalúan el uso previsto;
+el peor caso y la estabilidad entre semillas o máquinas quedan fuera del experimento.
 
 ### Fuentes
 
 - Barber, C. B., Dobkin, D. P. y Huhdanpaa, H. (1996). *The Quickhull Algorithm for
-  Convex Hulls*. ACM TOMS, 22(4), 469–483. Referencia bibliográfica contrastada en
-  https://raw.githubusercontent.com/qhull/qhull/master/README.txt; idea y descripción
-  de Qhull consultadas en su manual oficial, no se atribuyen páginas no leídas del PDF.
+  Convex Hulls*. ACM TOMS, 22(4), 469–483. Referencia en
+  https://raw.githubusercontent.com/qhull/qhull/master/README.txt.
 - Qhull, *Manual*, apartados algoritmo, estructuras y rendimiento, disponible en
   https://raw.githubusercontent.com/qhull/qhull/master/html/index.htm y
   https://raw.githubusercontent.com/qhull/qhull/master/html/qh-code.htm.

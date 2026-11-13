@@ -5,6 +5,7 @@
                                                 por versión, eje y logarítmico
 - results/r2/normalizacion_lineal.csv         T/(k·V) en ns, análisis derivado sin medir
 - results/figuras/r3_tiempos.png               (opcional) propio vs SciPy por conjunto
+- results/r3/tiempo_por_punto.csv             tiempos normalizados en µs por punto
 - results/figuras/r4_tiempo_vs_k.png           k vs tiempo (ms), una curva por método, eje y
                                                logarítmico, "no completadas" marcadas
 Cada figura: título, ejes con unidad, leyenda; PNG a 150 dpi.
@@ -174,9 +175,11 @@ def _tamano_grafo_java() -> int:
 def graficar_envolvente() -> None:
     """Barras por distribución, sin unir tamaños ni inventar tiempo cero en timeout."""
     tabla = pd.read_csv(RESULTS / "r3/envolvente.csv")
-    requeridas = {"conjunto", "tiempo_propio_ms", "tiempo_scipy_ms", "estado_propio", "estado_scipy"}
+    requeridas = {"conjunto", "n", "tiempo_propio_ms", "tiempo_scipy_ms", "estado_propio", "estado_scipy"}
     if tabla.empty or not requeridas.issubset(tabla.columns) or tabla.conjunto.duplicated().any():
         raise ValueError("Tabla R3 vacía, duplicada o con columnas faltantes")
+    if not all(math.isfinite(float(n)) and n > 0 and n == int(n) for n in tabla.n):
+        raise ValueError("n de R3 debe ser entero positivo")
     for metodo in ("propio", "scipy"):
         for fila in tabla.to_dict("records"):
             estado, tiempo = fila[f"estado_{metodo}"], fila[f"tiempo_{metodo}_ms"]
@@ -185,6 +188,13 @@ def graficar_envolvente() -> None:
                     raise ValueError("Tiempo R3 inválido")
             elif estado != "no completada" or not pd.isna(tiempo):
                 raise ValueError("Estado R3 desconocido o timeout con tiempo ficticio")
+    normalizacion = tabla[["conjunto", "n", "tiempo_propio_ms", "tiempo_scipy_ms"]].copy()
+    for metodo in ("propio", "scipy"):
+        valores = 1000 * tabla[f"tiempo_{metodo}_ms"] / tabla.n
+        if not all(math.isfinite(float(v)) for v in valores[tabla[f"estado_{metodo}"] == "completada"]):
+            raise ValueError("Normalización R3 no finita")
+        normalizacion[f"{metodo}_us_por_punto"] = valores
+    normalizacion[["estado_propio", "estado_scipy"]] = tabla[["estado_propio", "estado_scipy"]]
     FIGURAS.mkdir(parents=True, exist_ok=True)
     figura, eje = plt.subplots(figsize=(9, 5))
     try:
@@ -206,5 +216,6 @@ def graficar_envolvente() -> None:
         eje.legend()
         figura.tight_layout()
         figura.savefig(FIGURAS / "r3_tiempos.png", dpi=150)
+        normalizacion.to_csv(RESULTS / "r3/tiempo_por_punto.csv", index=False)
     finally:
         plt.close(figura)

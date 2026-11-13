@@ -169,7 +169,7 @@ def test_t3fa_figura_por_conjunto_y_timeout(entorno, monkeypatch):
     origen_r1, _ = entorno
     carpeta = origen_r1.parent.parent / "r3"
     carpeta.mkdir()
-    pd.DataFrame({"conjunto": ["red", "cuadrado_1000"], "tiempo_propio_ms": [2, 3],
+    pd.DataFrame({"conjunto": ["red", "cuadrado_1000"], "n": [200, 1000], "tiempo_propio_ms": [2, 3],
                   "tiempo_scipy_ms": [1, None], "estado_propio": ["completada"] * 2,
                   "estado_scipy": ["completada", "no completada"]}).to_csv(
         carpeta / "envolvente.csv", index=False)
@@ -185,6 +185,10 @@ def test_t3fa_figura_por_conjunto_y_timeout(entorno, monkeypatch):
     monkeypatch.setattr(Figure, "savefig", comprobar)
     graficas.ejecutar()
     assert (graficas.FIGURAS / "r3_tiempos.png").exists()
+    tabla = pd.read_csv(carpeta / "tiempo_por_punto.csv")
+    assert tabla.propio_us_por_punto.tolist() == [10, 3]
+    assert tabla.scipy_us_por_punto.iloc[0] == 5
+    assert pd.isna(tabla.scipy_us_por_punto.iloc[1])
     assert not plt.get_fignums()
 
 
@@ -192,9 +196,24 @@ def test_t3fa_figura_rechaza_timeout_con_tiempo(entorno):
     origen_r1, _ = entorno
     carpeta = origen_r1.parent.parent / "r3"
     carpeta.mkdir()
-    pd.DataFrame({"conjunto": ["red"], "tiempo_propio_ms": [2], "tiempo_scipy_ms": [1],
+    pd.DataFrame({"conjunto": ["red"], "n": [200], "tiempo_propio_ms": [2], "tiempo_scipy_ms": [1],
                   "estado_propio": ["completada"], "estado_scipy": ["no completada"]}).to_csv(
         carpeta / "envolvente.csv", index=False)
     with pytest.raises(ValueError):
         graficas.ejecutar()
     assert not (graficas.FIGURAS / "r3_tiempos.png").exists()
+
+
+@pytest.mark.parametrize("n", [0, -1, 1.5, float("inf"), None])
+def test_t3fb_normalizacion_rechaza_tamano_invalido(entorno, n):
+    origen_r1, _ = entorno
+    carpeta = origen_r1.parent.parent / "r3"
+    carpeta.mkdir()
+    pd.DataFrame({"conjunto": ["red"], "n": [n], "tiempo_propio_ms": [2],
+                  "tiempo_scipy_ms": [1], "estado_propio": ["completada"],
+                  "estado_scipy": ["completada"]}).to_csv(carpeta / "envolvente.csv", index=False)
+    salida = carpeta / "tiempo_por_punto.csv"
+    salida.write_text("anterior", encoding="utf-8")
+    with pytest.raises(ValueError):
+        graficas.graficar_envolvente()
+    assert salida.read_text(encoding="utf-8") == "anterior"

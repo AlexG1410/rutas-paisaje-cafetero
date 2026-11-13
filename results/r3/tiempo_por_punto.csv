@@ -1,0 +1,5 @@
+conjunto,n,tiempo_propio_ms,tiempo_scipy_ms,propio_us_por_punto,scipy_us_por_punto,estado_propio,estado_scipy
+red,8791,1.3266,2.9798,0.15090433397793196,0.3389603003071323,completada,completada
+cuadrado_1000,1000,0.3856,1.2646,0.3856,1.2646,completada,completada
+cuadrado_10000,10000,1.609,5.4232,0.1609,0.54232,completada,completada
+cuadrado_50000,50000,4.0947,9.7305,0.08189399999999998,0.19461,completada,completada

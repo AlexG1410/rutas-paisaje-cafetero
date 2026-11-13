@@ -3,6 +3,19 @@
 Estado: implementado, verificado y experimentado; documento y figura disponibles (2026-11-12).
 Responsable: _(asignar)_ · Peso: 20 %.
 
+Mejora documental aprobada (2026-11-12): discusión más directa, normalización por
+punto y revisión del promedio. `graficas` genera `results/r3/tiempo_por_punto.csv`
+desde `envolvente.csv`, sin repetir mediciones: columnas `conjunto,n,
+tiempo_propio_ms,tiempo_scipy_ms,propio_us_por_punto,scipy_us_por_punto,
+estado_propio,estado_scipy`. Se calcula `1000·tiempo_ms/n`; n debe ser entero positivo
+y cada timeout conserva su tiempo y normalización vacíos. Casos T3.F-b: fórmula,
+tamaño inválido y timeout. Los CSV medidos mantienen su contrato y contenido.
+La incorporación de Rényi–Sulanke requiere verificar el artículo original y distinguir
+el modelo uniforme continuo del generador entero; hasta entonces, fuente pendiente.
+Verificación de esta mejora: Python 171/171 y Java focalizado en EnvolventeConvexa,
+ExperimentoR3Service y arquitectura aprobado. Normalización generada con `graficas`;
+mediciones y algoritmos originales conservados. Revisión bibliográfica original pendiente.
+
 Evidencia: cuatro conjuntos coinciden con SciPy antes y después de medir; cinco
 repeticiones por método sin timeout. Red: 8791 puntos y 14 vértices. Tabla final,
 conjuntos, vértices, datos de máquina y figura generados por comandos en results/r3/

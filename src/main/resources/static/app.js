@@ -165,8 +165,34 @@ async function ejecutar(boton, destino, accion) {
   }
 }
 
+// Indicador de la pestaña activa: recorta la capa verde a la pestaña elegida. El borde que
+// va adelante se mueve más rápido que el de atrás, así la píldora se estira al desplazarse.
+const capaActiva = document.querySelector('.pestanas-activa');
+
+function moverIndicador(boton, animar = true) {
+  if (!capaActiva || !boton) return;
+  const caja = capaActiva.getBoundingClientRect();
+  const destino = boton.getBoundingClientRect();
+  const izquierdaActual = parseFloat(getComputedStyle(capaActiva).getPropertyValue('--izq')) || 0;
+  const izquierda = destino.left - caja.left;
+  capaActiva.classList.toggle('sin-transicion', !animar);
+  capaActiva.classList.toggle('a-derecha', izquierda >= izquierdaActual);
+  capaActiva.classList.toggle('a-izquierda', izquierda < izquierdaActual);
+  capaActiva.style.setProperty('--izq', `${izquierda}px`);
+  capaActiva.style.setProperty('--der', `${caja.right - destino.right}px`);
+  capaActiva.style.setProperty('--arr', `${destino.top - caja.top}px`);
+  capaActiva.style.setProperty('--aba', `${caja.bottom - destino.bottom}px`);
+}
+
+moverIndicador(document.querySelector('.pestana.activa'), false);
+if (window.ResizeObserver) {
+  new ResizeObserver(() => moverIndicador(document.querySelector('.pestana.activa'), false))
+    .observe(document.querySelector('.pestanas'));
+}
+
 document.querySelectorAll('.pestana').forEach((boton) => {
   boton.addEventListener('click', () => {
+    moverIndicador(boton);
     version++;
     solicitudes.abort();
     document.querySelectorAll('.pestana').forEach((b) => {

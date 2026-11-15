@@ -171,16 +171,48 @@ h1 span { color: var(--dorado-claro); }
 
 .pestana:hover:not(.activa) { background: var(--tarjeta-2); }
 
-.pestana.activa {
+.pestana:focus-visible { z-index: 3; }
+
+/* Indicador deslizante: una capa verde con las etiquetas en blanco, recortada a la
+   pestaña activa. Cada borde se anima por separado para que la píldora se estire. */
+@property --izq { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --der { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --arr { syntax: "<length>"; inherits: false; initial-value: 0px; }
+@property --aba { syntax: "<length>"; inherits: false; initial-value: 0px; }
+
+.pestanas-activa {
+  --rapido: 380ms;
+  --lento: 520ms;
+  --suave: cubic-bezier(0.45, 0.05, 0.2, 1);
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  grid-template-columns: inherit;
+  gap: inherit;
+  padding: inherit;
+  border-radius: inherit;
   color: #fff;
-  font-weight: 600;
   background: linear-gradient(180deg, var(--verde-2), var(--verde));
-  box-shadow: 0 6px 16px rgba(31, 81, 55, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  clip-path: inset(var(--arr) var(--der) var(--aba) var(--izq) round 999px);
+  pointer-events: none;
+  transition: --izq var(--lento) var(--suave), --der var(--lento) var(--suave),
+    --arr var(--lento) var(--suave), --aba var(--lento) var(--suave);
 }
 
-.pestana.activa .ico { color: #fff; }
+.pestanas-activa.a-derecha {
+  transition: --izq var(--lento) var(--suave), --der var(--rapido) var(--suave),
+    --arr var(--rapido) var(--suave), --aba var(--rapido) var(--suave);
+}
 
-.pestana.activa::after {
+.pestanas-activa.a-izquierda {
+  transition: --izq var(--rapido) var(--suave), --der var(--lento) var(--suave),
+    --arr var(--rapido) var(--suave), --aba var(--rapido) var(--suave);
+}
+
+.pestanas-activa.sin-transicion { transition: none; }
+
+.pestana-copia::after {
   content: "";
   position: absolute;
   left: 30%;

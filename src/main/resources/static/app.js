@@ -46,14 +46,40 @@ function limpiarMapa() {
 }
 
 function ajustarMapa() {
-  if (capas?.getBounds().isValid()) mapa.fitBounds(capas.getBounds(), { padding: [25, 25], maxZoom: 15 });
+  if (capas?.getBounds().isValid()) mapa.fitBounds(capas.getBounds(), { padding: [25, 25], maxZoom: 15, animate: false });
+}
+
+const sinMovimiento = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Vuelve a disparar la animación de entrada sobre un contenedor de resultados.
+function revelar(destino) {
+  destino.classList.remove('revelado');
+  void destino.offsetWidth;
+  destino.classList.add('revelado');
+}
+
+// Dibuja progresivamente un camino ya ajustado al encuadre final del mapa.
+function trazar(capa) {
+  const camino = capa?.getElement?.();
+  if (!camino || sinMovimiento()) return;
+  const largo = camino.getTotalLength();
+  camino.style.strokeDasharray = `${largo}`;
+  camino.style.strokeDashoffset = `${largo}`;
+  camino.getBoundingClientRect();
+  camino.style.transition = 'stroke-dashoffset 1s cubic-bezier(0.4, 0, 0.2, 1)';
+  camino.style.strokeDashoffset = '0';
+  camino.addEventListener('transitionend', () => {
+    camino.style.removeProperty('stroke-dasharray');
+    camino.style.removeProperty('stroke-dashoffset');
+    camino.style.removeProperty('transition');
+  }, { once: true });
 }
 
 function marcador(coordenada, texto) {
   if (!mapa || !coordenada) return;
   const etiqueta = document.createElement('span');
   etiqueta.textContent = texto;
-  L.circleMarker(coordenada, { radius: 6, color: '#183d32', fillOpacity: 0.9 })
+  L.circleMarker(coordenada, { radius: 6, color: '#183d32', fillOpacity: 0.9, className: 'marcador' })
     .bindTooltip(etiqueta).addTo(capas);
 }
 
@@ -72,7 +98,10 @@ async function ejecutar(boton, destino, accion) {
   try {
     await accion(signal, () => actual === version);
   } catch (error) {
-    if (actual === version && error.name !== 'AbortError') mostrarError(destino, error);
+    if (actual === version && error.name !== 'AbortError') {
+      mostrarError(destino, error);
+      revelar(destino);
+    }
   } finally {
     boton.disabled = false;
     destino.removeAttribute('aria-busy');
@@ -144,12 +173,14 @@ elemento('calcular-ruta').addEventListener('click', (evento) => {
     const destino = elemento('destino').value;
     const ruta = await api(`/api/ruta?${new URLSearchParams({ origen, destino })}`, { signal });
     if (!vigente()) return;
-    if (mapa) L.polyline(ruta.coordenadas, { color: '#2d6a4f', weight: 5 }).addTo(capas);
+    const linea = mapa ? L.polyline(ruta.coordenadas, { color: '#2d6a4f', weight: 5 }).addTo(capas) : null;
     marcador(ruta.coordenadas[0], `Origen vial: ${nombre(origen)}`);
     marcador(ruta.coordenadas.at(-1), `Destino vial: ${nombre(destino)}`);
     ajustarMapa();
+    trazar(linea);
     info.textContent = `${nombre(origen)} → ${nombre(destino)}. Tiempo estimado: ${numero(ruta.tiempoS / 60)} min · ` +
       `nodos explorados: ${ruta.nodosExplorados}.`;
+    revelar(info);
   });
 });
 
@@ -162,10 +193,11 @@ elemento('ver-envolvente').addEventListener('click', (evento) => {
       throw new Error('La envolvente no contiene un polígono válido. Ejecuta el experimento r3.');
     }
     if (mapa) L.polygon(vertices.map((v) => [Number(v.lat), Number(v.lon)]), {
-      color: '#7c3c15', fillOpacity: 0.15,
+      color: '#7c3c15', fillOpacity: 0.15, className: 'envolvente',
     }).addTo(capas);
     ajustarMapa();
     info.textContent = `${vertices.length} vértices de la envolvente de nodos. No representa la frontera administrativa.`;
+    revelar(info);
   });
 });
 
@@ -195,6 +227,7 @@ elemento('calcular-itinerario').addEventListener('click', (evento) => {
       `<h3>Vecino más cercano</h3>${tablaItinerario(comparacion.heuristico)}` +
       `<p>Diferencia de jornada: ${numero(comparacion.diferenciaMin)} min (${numero(comparacion.diferenciaPct, 2)} %).</p>` +
       '<p class="estado-mapa">Cargando caminos de ambos itinerarios…</p>';
+    revelar(info);
     const cache = new Map();
     async function coordenadas(itinerario) {
       const ids = [itinerario.idPartida, ...itinerario.paradas.map((p) => p.idLugar)];
@@ -213,11 +246,12 @@ elemento('calcular-itinerario').addEventListener('click', (evento) => {
       const voraz = await coordenadas(comparacion.heuristico);
       if (!vigente()) return;
       if (mapa) {
-        L.polyline(optimo, { color: '#2d6a4f', weight: 6, opacity: 0.8 }).addTo(capas);
+        const lineaOptima = L.polyline(optimo, { color: '#2d6a4f', weight: 6, opacity: 0.8 }).addTo(capas);
         L.polyline(voraz, { color: '#b42333', weight: 3, dashArray: '7 6' }).addTo(capas);
         marcador(optimo[0][0], `Partida y regreso: ${nombre(comparacion.optimo.idPartida)}`);
         comparacion.optimo.paradas.slice(0, -1).forEach((p, i) => marcador(optimo[i].at(-1), `${p.orden}. ${p.nombre}`));
         ajustarMapa();
+        trazar(lineaOptima);
       }
       elemento('leyenda').textContent = 'Verde continuo: Held-Karp · Rojo discontinuo: vecino más cercano. Pueden superponerse.';
       info.querySelector('.estado-mapa').textContent = mapa ? 'Caminos viales calculados con Dijkstra.' : 'Mapa no disponible; las tablas contienen la comparación.';
@@ -238,6 +272,7 @@ elemento('ver-tabla').addEventListener('click', (evento) => {
     const columnas = Object.keys(filas[0]);
     destino.innerHTML = `<div class="tabla-scroll"><table><thead><tr>${columnas.map((c) => `<th>${escapar(c)}</th>`).join('')}</tr></thead><tbody>` +
       filas.map((f) => `<tr>${columnas.map((c) => `<td>${escapar(f[c])}</td>`).join('')}</tr>`).join('') + '</tbody></table></div>';
+    revelar(destino);
   });
 });
 
@@ -250,7 +285,11 @@ async function cargarFiguras() {
       imagen.src = `/api/figuras/${encodeURIComponent(nombreFigura)}`;
       imagen.alt = nombreFigura;
       imagen.loading = 'lazy';
-      imagen.addEventListener('error', () => { pie.textContent = `No se pudo cargar ${nombreFigura}`; });
+      imagen.addEventListener('load', () => imagen.classList.add('cargada'));
+      imagen.addEventListener('error', () => {
+        imagen.classList.add('cargada');
+        pie.textContent = `No se pudo cargar ${nombreFigura}`;
+      });
       const pie = document.createElement('figcaption');
       pie.textContent = nombreFigura;
       marco.append(imagen, pie);

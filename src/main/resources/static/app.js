@@ -43,10 +43,15 @@ function mostrarError(destino, error) {
 function limpiarMapa() {
   capas?.clearLayers();
   elemento('leyenda').replaceChildren();
+  reiniciarResumen();
 }
 
 function ajustarMapa() {
-  if (capas?.getBounds().isValid()) mapa.fitBounds(capas.getBounds(), { padding: [25, 25], maxZoom: 15, animate: false });
+  if (capas?.getBounds().isValid()) {
+    mapa.fitBounds(capas.getBounds(), {
+      paddingTopLeft: [50, 55], paddingBottomRight: [110, 60], maxZoom: 15, animate: false,
+    });
+  }
 }
 
 const sinMovimiento = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -56,6 +61,47 @@ function revelar(destino) {
   destino.classList.remove('revelado');
   void destino.offsetWidth;
   destino.classList.add('revelado');
+}
+
+const ICONOS = {
+  reloj: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+  explorados: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg>',
+  nodos: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.3 10.9l7.4-3.7M8.3 13.1l7.4 3.7"/></svg>',
+  vertices: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8.5 6.2-3.2 10.3H6.7L3.5 9.2z"/></svg>',
+  diferencia: '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18l5-6 4 3 7-9"/><path d="M15 6h5v5"/></svg>',
+};
+
+const TITULOS = {
+  ruta: 'Ruta origen–destino',
+  envolvente: 'Envolvente convexa de la red',
+  itinerario: 'Itinerario de un día',
+  resultados: 'Resultados',
+};
+
+const formatoEntero = (valor) => Number(valor).toLocaleString('es-CO');
+
+// Encabezado del mapa: título y chips con los valores ya calculados en el servidor.
+function mostrarResumen(titulo, chips = []) {
+  elemento('titulo-mapa').textContent = titulo;
+  elemento('chips').replaceChildren(...chips.map(([icono, texto]) => {
+    const chip = document.createElement('span');
+    chip.className = 'chip';
+    chip.innerHTML = ICONOS[icono];
+    chip.append(texto);
+    return chip;
+  }));
+}
+
+function mostrarDatos(datos) {
+  for (const [id, valor] of Object.entries(datos)) {
+    elemento(id).textContent = valor;
+    revelar(elemento(id));
+  }
+}
+
+function reiniciarResumen() {
+  mostrarResumen(TITULOS[document.querySelector('main').dataset.modo] || TITULOS.ruta);
+  for (const id of ['dato-tiempo', 'dato-explorados', 'dato-camino']) elemento(id).textContent = '—';
 }
 
 // Dibuja progresivamente un camino ya ajustado al encuadre final del mapa.
@@ -75,15 +121,26 @@ function trazar(capa) {
   }, { once: true });
 }
 
-function marcador(coordenada, texto) {
+// tipo: 'origen' y 'destino' se dibujan como pines; 'parada' como círculo numerado.
+function marcador(coordenada, texto, { tipo = 'parada', etiqueta, numero } = {}) {
   if (!mapa || !coordenada) return;
-  const etiqueta = document.createElement('span');
-  etiqueta.textContent = texto;
-  L.circleMarker(coordenada, { radius: 6, color: '#183d32', fillOpacity: 0.9, className: 'marcador' })
-    .bindTooltip(etiqueta).addTo(capas);
+  const esPin = tipo === 'origen' || tipo === 'destino';
+  const icono = L.divIcon({
+    className: 'icono-pin',
+    html: esPin ? `<span class="pin pin-${tipo}"></span>` : `<span class="parada">${escapar(numero ?? '')}</span>`,
+    iconSize: esPin ? [30, 40] : [24, 24],
+    iconAnchor: esPin ? [15, 37] : [12, 12],
+  });
+  const marca = L.marker(coordenada, { icon: icono, title: texto, alt: texto, keyboard: false }).addTo(capas);
+  const contenido = document.createElement('span');
+  contenido.textContent = etiqueta || texto;
+  marca.bindTooltip(contenido, etiqueta
+    ? { permanent: true, direction: 'right', offset: [10, -22], className: 'etiqueta-pin' }
+    : { direction: 'top', offset: [0, esPin ? -34 : -12] });
 }
 
 const nombre = (id) => lugares.find((lugar) => lugar.id === id)?.nombre || id;
+const corto = (id) => nombre(id).replace(/\s*\(.*\)\s*$/, '');
 
 // Una nueva operación invalida las respuestas anteriores, incluso si llegan tarde.
 async function ejecutar(boton, destino, accion) {
@@ -119,6 +176,7 @@ document.querySelectorAll('.pestana').forEach((boton) => {
     document.querySelectorAll('.panel').forEach((p) => p.classList.add('oculto'));
     elemento(`panel-${boton.dataset.panel}`).classList.remove('oculto');
     document.querySelector('main').classList.toggle('solo-resultados', boton.dataset.panel === 'resultados');
+    document.querySelector('main').dataset.modo = boton.dataset.panel;
     document.querySelectorAll('[aria-busy="true"]').forEach((p) => {
       p.removeAttribute('aria-busy');
       p.textContent = 'Consulta cancelada. Puedes intentarlo de nuevo.';
@@ -173,14 +231,25 @@ elemento('calcular-ruta').addEventListener('click', (evento) => {
     const destino = elemento('destino').value;
     const ruta = await api(`/api/ruta?${new URLSearchParams({ origen, destino })}`, { signal });
     if (!vigente()) return;
-    const linea = mapa ? L.polyline(ruta.coordenadas, { color: '#2d6a4f', weight: 5 }).addTo(capas) : null;
-    marcador(ruta.coordenadas[0], `Origen vial: ${nombre(origen)}`);
-    marcador(ruta.coordenadas.at(-1), `Destino vial: ${nombre(destino)}`);
+    const borde = mapa ? L.polyline(ruta.coordenadas, { color: '#ffffff', weight: 10, opacity: 0.95 }).addTo(capas) : null;
+    const linea = mapa ? L.polyline(ruta.coordenadas, { color: '#e1a526', weight: 5 }).addTo(capas) : null;
+    marcador(ruta.coordenadas[0], `Origen vial: ${nombre(origen)}`, { tipo: 'origen', etiqueta: corto(origen) });
+    marcador(ruta.coordenadas.at(-1), `Destino vial: ${nombre(destino)}`, { tipo: 'destino', etiqueta: corto(destino) });
     ajustarMapa();
+    trazar(borde);
     trazar(linea);
     info.textContent = `${nombre(origen)} → ${nombre(destino)}. Tiempo estimado: ${numero(ruta.tiempoS / 60)} min · ` +
       `nodos explorados: ${ruta.nodosExplorados}.`;
     revelar(info);
+    mostrarResumen(`Ruta: ${corto(origen)} → ${corto(destino)}`, [
+      ['reloj', `≈ ${numero(ruta.tiempoS / 60)} min`],
+      ['nodos', `${formatoEntero(ruta.coordenadas.length)} nodos`],
+    ]);
+    mostrarDatos({
+      'dato-tiempo': `≈ ${numero(ruta.tiempoS / 60)} min`,
+      'dato-explorados': formatoEntero(ruta.nodosExplorados),
+      'dato-camino': formatoEntero(ruta.coordenadas.length),
+    });
   });
 });
 
@@ -198,6 +267,7 @@ elemento('ver-envolvente').addEventListener('click', (evento) => {
     ajustarMapa();
     info.textContent = `${vertices.length} vértices de la envolvente de nodos. No representa la frontera administrativa.`;
     revelar(info);
+    mostrarResumen(TITULOS.envolvente, [['vertices', `${vertices.length} vértices`]]);
   });
 });
 
@@ -228,6 +298,10 @@ elemento('calcular-itinerario').addEventListener('click', (evento) => {
       `<p>Diferencia de jornada: ${numero(comparacion.diferenciaMin)} min (${numero(comparacion.diferenciaPct, 2)} %).</p>` +
       '<p class="estado-mapa">Cargando caminos de ambos itinerarios…</p>';
     revelar(info);
+    mostrarResumen(`Itinerario desde ${corto(comparacion.optimo.idPartida)}`, [
+      ['reloj', `Óptimo: ${numero(comparacion.optimo.duracionJornadaMin / 60, 2)} h`],
+      ['diferencia', `Diferencia: ${numero(comparacion.diferenciaPct, 2)} %`],
+    ]);
     const cache = new Map();
     async function coordenadas(itinerario) {
       const ids = [itinerario.idPartida, ...itinerario.paradas.map((p) => p.idLugar)];
@@ -248,8 +322,10 @@ elemento('calcular-itinerario').addEventListener('click', (evento) => {
       if (mapa) {
         const lineaOptima = L.polyline(optimo, { color: '#2d6a4f', weight: 6, opacity: 0.8 }).addTo(capas);
         L.polyline(voraz, { color: '#b42333', weight: 3, dashArray: '7 6' }).addTo(capas);
-        marcador(optimo[0][0], `Partida y regreso: ${nombre(comparacion.optimo.idPartida)}`);
-        comparacion.optimo.paradas.slice(0, -1).forEach((p, i) => marcador(optimo[i].at(-1), `${p.orden}. ${p.nombre}`));
+        marcador(optimo[0][0], `Partida y regreso: ${nombre(comparacion.optimo.idPartida)}`,
+          { tipo: 'origen', etiqueta: corto(comparacion.optimo.idPartida) });
+        comparacion.optimo.paradas.slice(0, -1).forEach((p, i) => marcador(optimo[i].at(-1), `${p.orden}. ${p.nombre}`,
+          { numero: p.orden }));
         ajustarMapa();
         trazar(lineaOptima);
       }
@@ -299,5 +375,36 @@ async function cargarFiguras() {
   } catch (error) { mostrarError(elemento('figuras'), error); }
 }
 
+// La fotografía del panel se revela según la fracción que ya es visible al desplazarse.
+function revelarPostal() {
+  const postal = document.querySelector('.postal');
+  const paneles = document.querySelector('.paneles');
+  if (!postal || !paneles) return;
+  let pendiente = false;
+  const actualizar = () => {
+    pendiente = false;
+    const caja = postal.getBoundingClientRect();
+    if (!caja.height) return;
+    const limite = Math.min(paneles.getBoundingClientRect().bottom, window.innerHeight);
+    const visible = Math.min(Math.max((limite - caja.top) / caja.height, 0), 1);
+    postal.style.setProperty('--revelado', visible.toFixed(3));
+  };
+  const programar = () => {
+    if (pendiente) return;
+    pendiente = true;
+    requestAnimationFrame(actualizar);
+  };
+  paneles.addEventListener('scroll', programar, { passive: true });
+  window.addEventListener('scroll', programar, { passive: true });
+  window.addEventListener('resize', programar);
+  if (window.ResizeObserver) {
+    const observador = new ResizeObserver(programar);
+    observador.observe(paneles);
+    document.querySelectorAll('.panel').forEach((panel) => observador.observe(panel));
+  }
+  programar();
+}
+
 cargarLugares();
 cargarFiguras();
+revelarPostal();

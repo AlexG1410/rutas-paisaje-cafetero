@@ -4,87 +4,230 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Rutas del Paisaje Cultural Cafetero</title>
+  <link rel="icon" href="img/logo.webp" type="image/webp">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap">
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="estilos.css">
 </head>
 <body>
-<header>
+<header class="cabecera">
+  <img class="cabecera-paisaje" src="img/banner.webp" alt="" aria-hidden="true">
   <div class="marca">
-    <h1>Rutas del Paisaje Cultural Cafetero</h1>
-    <p>Red vial del Quindío · Algoritmos propios en Java</p>
+    <img class="logo" src="img/logo.webp" alt="Logo de Rutas del Paisaje Cultural Cafetero" width="199" height="240">
+    <span class="separador" aria-hidden="true"></span>
+    <div>
+      <h1>Rutas del Paisaje Cultural <span>Cafetero</span></h1>
+      <p>Red vial del Quindío · Algoritmos propios en Java</p>
+    </div>
   </div>
-  <nav aria-label="Funciones de la aplicación" role="tablist">
-    <button class="pestana activa" role="tab" aria-selected="true" data-panel="ruta">Ruta origen–destino</button>
-    <button class="pestana" role="tab" aria-selected="false" data-panel="envolvente">Envolvente convexa</button>
-    <button class="pestana" role="tab" aria-selected="false" data-panel="itinerario">Itinerario de un día</button>
-    <button class="pestana" role="tab" aria-selected="false" data-panel="resultados">Resultados R1–R4</button>
-  </nav>
 </header>
 
-<main>
+<nav class="pestanas" aria-label="Funciones de la aplicación" role="tablist">
+  <button class="pestana activa" role="tab" aria-selected="true" data-panel="ruta">
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="18" r="2"/><circle cx="19" cy="6" r="2"/><path d="M7 18h8a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h8"/></svg>
+    <span>Ruta origen–destino</span>
+  </button>
+  <button class="pestana" role="tab" aria-selected="false" data-panel="envolvente">
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8.5 6.2-3.2 10.3H6.7L3.5 9.2z"/><circle cx="12" cy="12" r="1.3"/><circle cx="9" cy="14.5" r="1"/><circle cx="15" cy="10" r="1"/></svg>
+    <span>Envolvente convexa</span>
+  </button>
+  <button class="pestana" role="tab" aria-selected="false" data-panel="itinerario">
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+    <span>Itinerario de un día</span>
+  </button>
+  <button class="pestana" role="tab" aria-selected="false" data-panel="resultados">
+    <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-7M10 20V6M15 20v-9M20 20V9"/></svg>
+    <span>Resultados R1–R4</span>
+  </button>
+</nav>
+
+<main data-modo="ruta">
   <div id="controles">
-    <section id="panel-ruta" class="panel">
-      <label>Origen <select id="origen"></select></label>
-      <label>Destino <select id="destino"></select></label>
-      <button id="calcular-ruta" disabled>Calcular ruta (Dijkstra con cola)</button>
-      <p id="info-ruta" class="info" aria-live="polite"></p>
-    </section>
+    <div class="paneles">
+      <section id="panel-ruta" class="panel">
+        <div class="titulo-panel">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v18M9 21h6M5.5 5.5h11l2.5 2.5-2.5 2.5h-11zM18.5 13h-11L5 15.5 7.5 18h11z"/></svg>
+          <div>
+            <h2>Consultar ruta</h2>
+            <p>Calcula el camino más rápido en la red vial del Quindío.</p>
+          </div>
+        </div>
+        <div class="trayecto">
+          <label class="campo">
+            <span class="campo-titulo campo-origen">
+              <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+              Origen
+            </span>
+            <select id="origen"></select>
+          </label>
+          <label class="campo">
+            <span class="campo-titulo campo-destino">
+              <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5.5 21V4M5.5 4H17l-2.2 4L17 12H5.5"/></svg>
+              Destino
+            </span>
+            <select id="destino"></select>
+          </label>
+        </div>
+        <button id="calcular-ruta" class="boton-principal" disabled>
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 4L4 20M15.5 4L20 20M12 5v2.5M12 11v2.5M12 17v2.5"/></svg>
+          <span>Calcular ruta (Dijkstra con cola)</span>
+          <svg class="ico flecha" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+        <p id="info-ruta" class="info" aria-live="polite"></p>
+      </section>
 
-    <section id="panel-envolvente" class="panel oculto">
-      <button id="ver-envolvente">Dibujar envolvente de la red</button>
-      <p id="info-envolvente" class="info" aria-live="polite"></p>
-    </section>
+      <section id="panel-envolvente" class="panel oculto">
+        <div class="titulo-panel">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8.5 6.2-3.2 10.3H6.7L3.5 9.2z"/><circle cx="12" cy="12" r="1.3"/><circle cx="9" cy="14.5" r="1"/><circle cx="15" cy="10" r="1"/></svg>
+          <div>
+            <h2>Envolvente convexa</h2>
+            <p>Polígono convexo mínimo que contiene los nodos de la red vial.</p>
+          </div>
+        </div>
+        <button id="ver-envolvente" class="boton-principal">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8.5 6.2-3.2 10.3H6.7L3.5 9.2z"/></svg>
+          <span>Dibujar envolvente de la red</span>
+          <svg class="ico flecha" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+        <p id="info-envolvente" class="info" aria-live="polite"></p>
+      </section>
 
-    <section id="panel-itinerario" class="panel oculto">
-      <label>Partida <select id="partida"></select></label>
-      <p>Atractivos (entre 6 y 8):</p>
-      <p id="contador-atractivos" aria-live="polite"></p>
-      <details>
-        <summary>Elegir o cambiar atractivos</summary>
-        <div id="lista-atractivos"></div>
-      </details>
-      <button id="calcular-itinerario" disabled>Comparar Held-Karp y heurística</button>
-      <p class="nota">Se conserva tu selección en ambos métodos. No se retiran atractivos automáticamente.
-        La jornada incluye visitas y regreso, sin horarios de apertura, comidas ni tráfico real.</p>
-      <div id="info-itinerario" class="info" aria-live="polite"></div>
-    </section>
+      <section id="panel-itinerario" class="panel oculto">
+        <div class="titulo-panel">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+          <div>
+            <h2>Planear itinerario</h2>
+            <p>Compara el recorrido óptimo con la heurística del vecino más cercano.</p>
+          </div>
+        </div>
+        <label class="campo">
+          <span class="campo-titulo campo-origen">
+            <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>
+            Partida
+          </span>
+          <select id="partida"></select>
+        </label>
+        <p class="subtitulo">Atractivos (entre 6 y 8):</p>
+        <p id="contador-atractivos" aria-live="polite"></p>
+        <details>
+          <summary>Elegir o cambiar atractivos</summary>
+          <div id="lista-atractivos"></div>
+        </details>
+        <button id="calcular-itinerario" class="boton-principal" disabled>
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18l5-6 4 3 7-9"/><path d="M15 6h5v5"/></svg>
+          <span>Comparar Held-Karp y heurística</span>
+          <svg class="ico flecha" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+        <p class="nota">Se conserva tu selección en ambos métodos. No se retiran atractivos automáticamente.
+          La jornada incluye visitas y regreso, sin horarios de apertura, comidas ni tráfico real.</p>
+        <div id="info-itinerario" class="info" aria-live="polite"></div>
+      </section>
 
-    <section id="panel-resultados" class="panel oculto">
-      <label>Tabla
-        <select id="tabla">
-          <option>r1/tamano_red.csv</option>
-          <option>r1/tiempo_componente.csv</option>
-          <option>r1/memoria_representacion.csv</option>
-          <option>r1/lugares_lejanos.csv</option>
-          <option>r2/cociente.csv</option>
-          <option>r2/mediciones_dijkstra.csv</option>
-          <option>r2/normalizacion_lineal.csv</option>
-          <option>r2/verificacion_networkx.csv</option>
-          <option>r3/envolvente.csv</option>
-          <option>r3/tiempo_por_punto.csv</option>
-          <option>r4/exactas.csv</option>
-          <option>r4/memoria_held_karp.csv</option>
-          <option>r4/calidad_heuristica.csv</option>
-          <option>r4/calidad_detalle.csv</option>
-          <option>r4/itinerario.csv</option>
-          <option>r4/itinerario_resumen.csv</option>
-          <option>r4/retiros.csv</option>
-          <option>r4/voraz_vs_optimo.csv</option>
-          <option>r4/cocientes_tiempos.csv</option>
-        </select>
-      </label>
-      <button id="ver-tabla">Ver tabla</button>
-      <div id="contenido-tabla" class="info" aria-live="polite"></div>
-      <div id="figuras"></div>
-    </section>
+      <section id="panel-resultados" class="panel oculto">
+        <div class="titulo-panel">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20v-7M10 20V6M15 20v-9M20 20V9"/></svg>
+          <div>
+            <h2>Resultados experimentales</h2>
+            <p>Tablas y figuras de los experimentos R1–R4.</p>
+          </div>
+        </div>
+        <label class="campo">
+          <span class="campo-titulo">Tabla</span>
+          <select id="tabla">
+            <option>r1/tamano_red.csv</option>
+            <option>r1/tiempo_componente.csv</option>
+            <option>r1/memoria_representacion.csv</option>
+            <option>r1/lugares_lejanos.csv</option>
+            <option>r2/cociente.csv</option>
+            <option>r2/mediciones_dijkstra.csv</option>
+            <option>r2/normalizacion_lineal.csv</option>
+            <option>r2/verificacion_networkx.csv</option>
+            <option>r3/envolvente.csv</option>
+            <option>r3/tiempo_por_punto.csv</option>
+            <option>r4/exactas.csv</option>
+            <option>r4/memoria_held_karp.csv</option>
+            <option>r4/calidad_heuristica.csv</option>
+            <option>r4/calidad_detalle.csv</option>
+            <option>r4/itinerario.csv</option>
+            <option>r4/itinerario_resumen.csv</option>
+            <option>r4/retiros.csv</option>
+            <option>r4/voraz_vs_optimo.csv</option>
+            <option>r4/cocientes_tiempos.csv</option>
+          </select>
+        </label>
+        <button id="ver-tabla" class="boton-principal">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9.5h17M3.5 14.5h17M10 9.5v10"/></svg>
+          <span>Ver tabla</span>
+          <svg class="ico flecha" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+        <div id="contenido-tabla" class="info" aria-live="polite"></div>
+        <div id="figuras"></div>
+      </section>
+      <div class="postal" aria-hidden="true">
+        <img src="img/finca.webp" alt="">
+      </div>
+    </div>
   </div>
+
   <section id="zona-mapa" aria-label="Mapa de recorridos">
-    <p id="aviso-mapa" class="advertencia" role="status"></p>
-    <div id="mapa"></div>
-    <p id="leyenda" aria-live="polite"></p>
-    <p class="nota">Los caminos siguen nodos de la red dirigida, unidos por segmentos: no se conserva toda
-      la curvatura de las carreteras. Los extremos son nodos viales asociados, no accesos exactos a cada lugar.
-      Las alertas de asociación de R1 pueden consultarse en Resultados. Mapa base: requiere internet.</p>
+    <div class="tarjeta-mapa">
+      <div class="mapa-cabecera">
+        <div class="mapa-titulo">
+          <span class="mapa-titulo-icono">
+            <svg class="ico ic-ruta" viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="18" r="2"/><circle cx="19" cy="6" r="2"/><path d="M7 18h8a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h8"/></svg>
+            <svg class="ico ic-envolvente" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l8.5 6.2-3.2 10.3H6.7L3.5 9.2z"/></svg>
+            <svg class="ico ic-itinerario" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+          </span>
+          <h2 id="titulo-mapa">Ruta origen–destino</h2>
+        </div>
+        <div id="chips" class="chips"></div>
+      </div>
+      <p id="aviso-mapa" class="advertencia" role="status"></p>
+      <div class="marco-mapa">
+        <div id="mapa"></div>
+        <div class="brujula" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M12 3l4 9h-8z"/></svg>
+          <span>N</span>
+        </div>
+        <div class="leyenda-mapa" aria-hidden="true">
+          <span class="ley ley-ruta"><i class="trazo trazo-dorado"></i>Ruta calculada</span>
+          <span class="ley ley-envolvente"><i class="trazo trazo-cafe"></i>Envolvente</span>
+          <span class="ley ley-itinerario"><i class="trazo trazo-verde"></i>Held-Karp</span>
+          <span class="ley ley-itinerario"><i class="trazo trazo-rojo"></i>Vecino más cercano</span>
+          <span class="ley ley-fuente">
+            <svg class="ico" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg>
+            OpenStreetMap
+          </span>
+        </div>
+      </div>
+      <p id="leyenda" aria-live="polite"></p>
+      <p class="nota">Los caminos siguen nodos de la red dirigida, unidos por segmentos: no se conserva toda
+        la curvatura de las carreteras. Los extremos son nodos viales asociados, no accesos exactos a cada lugar.
+        Las alertas de asociación de R1 pueden consultarse en Resultados. Mapa base: requiere internet.</p>
+    </div>
+
+    <div class="estadisticas" aria-label="Resumen de la ruta">
+      <div class="dato">
+        <span class="dato-icono dato-verde">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+        </span>
+        <div><span class="dato-titulo">Tiempo estimado</span><strong id="dato-tiempo">—</strong></div>
+      </div>
+      <div class="dato">
+        <span class="dato-icono dato-arena">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.3-4.3"/></svg>
+        </span>
+        <div><span class="dato-titulo">Nodos explorados</span><strong id="dato-explorados">—</strong></div>
+      </div>
+      <div class="dato">
+        <span class="dato-icono dato-rosa">
+          <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.3 10.9l7.4-3.7M8.3 13.1l7.4 3.7"/></svg>
+        </span>
+        <div><span class="dato-titulo">Nodos del camino</span><strong id="dato-camino">—</strong></div>
+      </div>
+    </div>
   </section>
 </main>
 

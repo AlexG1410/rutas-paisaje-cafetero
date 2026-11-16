@@ -311,6 +311,10 @@ function tablaItinerario(itinerario) {
 
 elemento('calcular-itinerario').addEventListener('click', (evento) => {
   const info = elemento('info-itinerario');
+  const vista = elemento('vista-itinerario');
+  vista.value = 'optimo';
+  vista.disabled = true;
+  vista.onchange = null;
   ejecutar(evento.currentTarget, info, async (signal, vigente) => {
     const atractivos = seleccion();
     if (atractivos.length < 6 || atractivos.length > 8) throw new Error('Elige entre 6 y 8 atractivos.');
@@ -346,16 +350,55 @@ elemento('calcular-itinerario').addEventListener('click', (evento) => {
       const voraz = await coordenadas(comparacion.heuristico);
       if (!vigente()) return;
       if (mapa) {
-        const lineaOptima = L.polyline(optimo, { color: '#2d6a4f', weight: 6, opacity: 0.8 }).addTo(capas);
-        L.polyline(voraz, { color: '#b42333', weight: 3, dashArray: '7 6' }).addTo(capas);
-        marcador(optimo[0][0], `Partida y regreso: ${nombre(comparacion.optimo.idPartida)}`,
-          { tipo: 'origen', etiqueta: corto(comparacion.optimo.idPartida) });
-        comparacion.optimo.paradas.slice(0, -1).forEach((p, i) => marcador(optimo[i].at(-1), `${p.orden}. ${p.nombre}`,
-          { numero: p.orden }));
-        ajustarMapa();
-        trazar(lineaOptima);
+        // Cada método conserva su camino y sus marcadores en el orden devuelto por Java.
+        function dibujarItinerario(itinerario, tramos, metodo, opciones) {
+          const grupo = L.featureGroup();
+          const linea = L.polyline(tramos, opciones).addTo(grupo);
+          function parada(coordenada, texto, orden) {
+            const partida = orden === 'P';
+            const icono = L.divIcon({
+              className: 'icono-pin',
+              html: partida ? '<span class="pin pin-origen" data-partida></span>'
+                : `<span class="parada">${escapar(orden)}</span>`,
+              iconSize: partida ? [30, 40] : [24, 24],
+              iconAnchor: partida ? [15, 37] : [12, 12],
+            });
+            const etiqueta = document.createElement('span');
+            etiqueta.textContent = `${metodo}: ${texto}`;
+            L.marker(coordenada, { icon: icono, title: etiqueta.textContent, alt: etiqueta.textContent })
+              .bindTooltip(etiqueta).addTo(grupo);
+          }
+          parada(tramos[0][0], `P. Partida y regreso: ${nombre(itinerario.idPartida)}`, 'P');
+          itinerario.paradas.slice(0, -1).forEach((p, i) =>
+            parada(tramos[i].at(-1), `${p.orden}. ${p.nombre}`, p.orden));
+          return { grupo, linea };
+        }
+        const recorridos = {
+          optimo: dibujarItinerario(comparacion.optimo, optimo, 'Óptimo', { color: '#2d6a4f', weight: 6, opacity: 0.8 }),
+          vecino: dibujarItinerario(comparacion.heuristico, voraz, 'Vecino', { color: '#b42333', weight: 3, dashArray: '7 6' }),
+        };
+        function mostrarVista() {
+          if (!vigente()) { vista.disabled = true; return; }
+          for (const [metodo, recorrido] of Object.entries(recorridos)) {
+            if (vista.value === 'ambos' || vista.value === metodo) capas.addLayer(recorrido.grupo);
+            else capas.removeLayer(recorrido.grupo);
+          }
+          document.querySelectorAll('.ley-itinerario').forEach((ley) => {
+            const metodo = ley.querySelector('.trazo-verde') ? 'optimo' : 'vecino';
+            ley.hidden = vista.value !== 'ambos' && vista.value !== metodo;
+          });
+          elemento('leyenda').textContent = {
+            optimo: 'Verde continuo: Held-Karp (óptimo). Números: orden de visita · P: partida y regreso.',
+            vecino: 'Rojo discontinuo: vecino más cercano. Números: orden de visita · P: partida y regreso.',
+            ambos: 'Verde continuo: Held-Karp · Rojo discontinuo: vecino más cercano. Cada método tiene su orden; pueden superponerse. P: partida y regreso.',
+          }[vista.value];
+          ajustarMapa();
+        }
+        vista.disabled = false;
+        vista.onchange = mostrarVista;
+        mostrarVista();
+        trazar(recorridos.optimo.linea);
       }
-      elemento('leyenda').textContent = 'Verde continuo: Held-Karp · Rojo discontinuo: vecino más cercano. Pueden superponerse.';
       info.querySelector('.estado-mapa').textContent = mapa ? 'Caminos viales calculados con Dijkstra.' : 'Mapa no disponible; las tablas contienen la comparación.';
     } catch (error) {
       if (vigente() && error.name !== 'AbortError') {

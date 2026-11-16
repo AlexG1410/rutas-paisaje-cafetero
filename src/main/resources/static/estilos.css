@@ -498,6 +498,16 @@ summary::marker { color: var(--dorado); }
   background: #fff;
 }
 
+/* Solo las tablas del itinerario: cinco columnas, con nombres multilínea. */
+#info-itinerario table { table-layout: fixed; }
+#info-itinerario th, #info-itinerario td { min-width: 0; padding-inline: 0.25rem; }
+#info-itinerario th { overflow-wrap: anywhere; }
+#info-itinerario th:nth-child(1) { width: 10%; }
+#info-itinerario th:nth-child(2) { width: 40%; }
+#info-itinerario th:nth-child(3), #info-itinerario th:nth-child(5) { width: 17%; }
+#info-itinerario th:nth-child(4) { width: 16%; }
+#info-itinerario td:nth-child(2) { white-space: normal; overflow-wrap: anywhere; }
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -694,6 +704,8 @@ main[data-modo="ruta"] .ley-ruta,
 main[data-modo="envolvente"] .ley-envolvente,
 main[data-modo="itinerario"] .ley-itinerario { display: inline-flex; }
 
+main[data-modo="itinerario"] .ley-itinerario[hidden] { display: none; }
+
 .trazo { display: inline-block; width: 22px; height: 4px; border-radius: 3px; }
 
 .trazo-dorado { background: #e1a526; box-shadow: 0 0 0 1.5px #fff, 0 0 0 2.5px rgba(0, 0, 0, 0.08); }
@@ -836,6 +848,19 @@ main[data-modo="ruta"] .estadisticas { display: grid; }
 }
 
 .pin-origen { background: var(--verde); }
+
+/* Reutiliza el pin existente, identificando la partida del itinerario con P. */
+main[data-modo="itinerario"] .pin[data-partida]::after {
+  content: "P";
+  width: auto;
+  height: auto;
+  display: grid;
+  place-items: center;
+  background: none;
+  color: #fff;
+  font-weight: 700;
+  transform: rotate(45deg);
+}
 
 .pin-destino { background: #d0352b; }
 

@@ -138,6 +138,14 @@
           <span>Comparar Held-Karp y heurística</span>
           <svg class="ico flecha" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
         </button>
+        <label class="campo">
+          <span class="campo-titulo">Recorrido en el mapa</span>
+          <select id="vista-itinerario" disabled>
+            <option value="optimo">Óptimo</option>
+            <option value="vecino">Vecino</option>
+            <option value="ambos">Ambos</option>
+          </select>
+        </label>
         <p class="nota">Se conserva tu selección en ambos métodos. No se retiran atractivos automáticamente.
           La jornada incluye visitas y regreso, sin horarios de apertura, comidas ni tráfico real.</p>
         <div id="info-itinerario" class="info" aria-live="polite"></div>
@@ -213,7 +221,7 @@
           <span class="ley ley-ruta"><i class="trazo trazo-dorado"></i>Ruta calculada</span>
           <span class="ley ley-envolvente"><i class="trazo trazo-cafe"></i>Envolvente</span>
           <span class="ley ley-itinerario"><i class="trazo trazo-verde"></i>Held-Karp</span>
-          <span class="ley ley-itinerario"><i class="trazo trazo-rojo"></i>Vecino más cercano</span>
+          <span class="ley ley-itinerario" hidden><i class="trazo trazo-rojo"></i>Vecino más cercano</span>
           <span class="ley ley-fuente">
             <svg class="ico" viewBox="0 0 24 24"><path d="M12 3l9 5-9 5-9-5z"/><path d="M3 13l9 5 9-5"/></svg>
             OpenStreetMap

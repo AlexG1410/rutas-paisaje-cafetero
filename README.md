@@ -7,8 +7,20 @@ Planificación de rutas sobre la red vial real del Quindío (OpenStreetMap) con 
 y experimental de: Dijkstra (lineal y con cola de prioridad), envolvente convexa por divide y
 vencerás, y el viajante asimétrico (fuerza bruta, Held-Karp y una heurística voraz).
 
-**Integrantes:** _(completar)_ · **Docente:** _(completar)_ · **Fecha de descarga de la red:**
+**Integrantes:** Alex David Gutiérrez Jurado - Juan David Mejía Barbosa - Kevyn Ramírez González · **Docente:** Carlos Andres Florez · **Fecha de descarga de la red:**
 _(se registra en `data/processed/metadatos.json`)_
+
+## Accesos rápidos
+
+- **Usar la aplicación:** [inicio y datos necesarios](#aplicación-r5).
+- **Consultar el informe:** [documento técnico](docs/documento-tecnico/README.md).
+- **Ver las evidencias:** [resultados CSV](results/) y [figuras](results/figuras/).
+- **Reproducir experimentos:** [comandos en orden](#reproducir-los-resultados).
+- **Consultar contratos y pruebas esperadas:** [especificaciones](specs/README.md).
+
+Para una demostración con los datos incluidos, basta iniciar la aplicación desde la raíz
+con `./gradlew bootRun` (PowerShell: `.\gradlew.bat bootRun`) y abrir
+http://localhost:8080. No hace falta repetir experimentos ni instalar Python para ese uso.
 
 ## Tecnología
 
@@ -135,8 +147,8 @@ El comando `graficas` usa eje vertical logarítmico en R2 y genera además
 `results/r1/memoria_representacion.csv` (filas `grafo_java`). Es análisis derivado,
 sin nuevas mediciones ni cambios en los tiempos originales.
 
-Los algoritmos pendientes lanzan `UnsupportedOperationException`: sus pruebas deben seguir
-visibles y fallarán hasta implementarlos. Eso no equivale a un fallo de instalación.
+**Nota histórica (antes del cierre de R2–R4):** los algoritmos entonces pendientes lanzaban
+`UnsupportedOperationException`; sus pruebas se mantuvieron visibles hasta implementarlos.
 Para comprobar por separado la infraestructura Java, desde la raíz:
 
 ```powershell
@@ -207,14 +219,14 @@ La descarga no calcula velocidades, tiempos de viaje ni la componente fuerte.
 `asignar_pesos` ya está implementado y verificado: devuelve una copia en memoria con
 velocidades OSM o imputadas por tipo y tiempos estimados positivos; conserva el GraphML
 original. La política completa está en `specs/R1-modelo-red.md`, R1.2.
-`procesar` ya integra pesos, componente fuerte y exportación; los experimentos Python siguen
-pendientes. Las pruebas de descarga usan una
+`procesar` integra pesos, componente fuerte y exportación; el experimento R1.3 se describe
+en [Asociación de lugares](#asociación-de-lugares-r14-sin-mediciones). Las pruebas de descarga usan una
 respuesta simulada y lectura/escritura GraphML real, no los servidores públicos.
 
 La adquisición real y la reutilización local se comprobaron el 2026-11-10 (fecha local).
 La fecha exacta en UTC y los conteos están dentro del propio GraphML; la red cruda se
 mantiene fuera de Git. Los CSV de red ya se generaron con `procesar` y se comprobó su lectura
-desde Java; esto no implica que existan resultados de experimentos.
+desde Java en esa etapa. Los resultados experimentales posteriores están en `results/`.
 
 ### Procesamiento local (sin internet)
 
@@ -264,7 +276,7 @@ repeticiones cada una. Tablas, datos de máquina y figura disponibles; el docume
 el cociente tiempo/(V+E) y su discusión. Las cuatro copias reales se reutilizaron sin HTTP ni cambios de hash/fecha;
 el hash del GraphML departamental sigue coincidiendo con el original.
 
-Suite Python actual: **126/126**, con regresiones de catálogo, figura e integración R1.3. La última suite
+**Estado histórico al cerrar R1:** Python **126/126**, con regresiones de catálogo, figura e integración R1.3. La última suite
 Java completa ejecutada antes de los cambios del protocolo tuvo 45/68 aprobadas y 23
 fallidas por algoritmos R2–R4 pendientes; los tests filtrados de R1/medición/arquitectura
 son satisfactorios tras corregir el protocolo. No equivale a suite completa verde.
@@ -279,8 +291,8 @@ devuelve `no completada`, sin mediana ni resultado parcial utilizable.
 
 Las tareas y datos deben ser serializables y las funciones importables (sin lambdas).
 Usar desde módulos/CLI con guardia `if __name__ == "__main__"`, no definir las tareas en
-un comando interactivo `python -c`. No añade dependencias. Falta integrarlo en SciPy;
-R1.3 ya está integrado y su primera ejecución real está verificada.
+un comando interactivo `python -c`. No añade dependencias. La integración con SciPy y su
+verificación posterior se documentan en el cierre de R3; R1.3 también está integrado.
 
 ## Aplicación (R5)
 
@@ -312,7 +324,9 @@ abrir la aplicación. Si el puerto 8080 está ocupado, detener la instancia ante
 3. **Itinerario:** elegir partida y desplegar Elegir o cambiar atractivos para seleccionar
    entre 6 y 8. Se precargan los siete del itinerario final R4. Comparar muestra Held-Karp
    y vecino más cercano, visitas, desplazamientos, jornada y diferencia. Verde continuo:
-   exacto; rojo discontinuo: heurística. Los caminos pueden superponerse.
+    exacto; rojo discontinuo: heurística. Los caminos pueden superponerse.
+    El selector **Recorrido en el mapa** muestra Óptimo (por defecto), Vecino o Ambos.
+    Los números indican el orden de visita y **P**, la partida y el regreso.
    Una jornada superior a 11 horas muestra aviso, pero no elimina lugares automáticamente.
    Los retiros del ejemplo R4 están en Resultados (`r4/retiros.csv`).
 4. **Resultados:** elegir una tabla y pulsar Ver tabla; desplazar horizontalmente si es

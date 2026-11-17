@@ -57,10 +57,14 @@ La interfaz solicita después `/api/ruta` para cada par consecutivo de ambos iti
 reutilizando pares coincidentes dentro de la comparación. Dijkstra obtiene los caminos
 viales; JavaScript solo agrupa sus coordenadas. Held-Karp se dibuja en verde continuo
 y vecino más cercano en rojo discontinuo; algunos tramos pueden superponerse.
+El selector **Recorrido en el mapa** permite ver **Óptimo**, **Vecino** o **Ambos**;
+por defecto muestra el óptimo. Cambiar esta vista no vuelve a consultar al servidor.
+Los marcadores numerados indican el orden de visita de cada método y **P** señala
+la partida y el regreso. La leyenda se ajusta al recorrido visible.
 Las tablas conservan los totales de la matriz R2 redondeada a tres decimales, mientras
 que la geometría proviene de Dijkstra con los pesos del grafo en memoria.
 
-![Comparación del itinerario y sus caminos](capturas/itinerario.png)
+![Itinerario óptimo con selector de recorridos y visitas numeradas](capturas/itinerario.png)
 
 Esta comparación no elimina lugares: si una jornada supera once horas, muestra una
 advertencia para ajustar la selección. La política de retiro de `ItinerarioService.planear`
@@ -98,7 +102,10 @@ La prueba reproducible `node src/test/javascript/r5-browser.cjs` usa Edge headle
 local y CDP sin paquetes adicionales. Con el servidor activo verificó las cuatro
 funciones sobre datos reales, figuras, aviso de once horas, selección inválida,
 texto externo no ejecutable, respuesta tardía, ancho móvil y Leaflet ausente.
-Las capturas de este capítulo provienen de esa ejecución y se revisaron visualmente.
+Las cuatro capturas de este capítulo se actualizaron el **2026-11-16** ejecutando
+ese mismo script sobre la interfaz actual a 1440 × 1000 píxeles y se revisaron
+visualmente. La captura del itinerario muestra la vista **Óptimo** predeterminada;
+las tablas completas se consultan desplazando el panel lateral.
 Node y Edge solo se necesitan para esta comprobación de desarrollo, no para usar la app.
 
 La ejecución local y el README están comprobados en el entorno del proyecto. La
